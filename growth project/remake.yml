@@ -1,0 +1,248 @@
+packages:
+  - stats
+  - stringr
+  - smatr
+  - plyr
+  - tidyr
+  - dplyr
+  - xtable
+  - igraph
+  - rmarkdown
+  - broom
+  - ggtern
+  - ggmap
+  - yaml
+  - mgcv
+  - knitr
+
+sources:
+  - R
+
+include:
+  - remake_species_data.yml
+
+targets:
+  all:
+    depends:
+      - ms-RA
+      - export
+      - analysis.R
+
+  # Paper on Reproductive allocation-----------------------------
+  ms-RA:
+    depends:
+    - ms/RA/figures/schematic.pdf
+    - ms/RA/figures/RA_demo.pdf
+    - ms/RA/figures/RA_all_a.pdf
+    - ms/RA/figures/investment.pdf
+    - ms/RA/figures/leaf_weight.pdf
+    - ms/RA/figures/life_history.pdf
+    - ms/RA/Wenk-RA-SI.pdf
+    - ms/RA/figures/abstract.pdf
+
+  ms/RA/figures/schematic.pdf:
+    command: plotRASexamples()
+    plot:
+      height: 2.5
+      width: 7.5
+
+  ms/RA/figures/RA_demo.pdf:
+    command: figure_allocation_demo_single(SummarySppAge)
+    plot:
+      width: 16
+      height: 4
+
+  ms/RA/figures/RA_demo_all.pdf:
+    command: figure_allocation_demo_all(SummarySppAge)
+    plot:
+      width: 16
+      height: 32
+
+  fits_figure_allocation_all_a:
+    command: fit_allocation_model(SummaryInd)
+
+  ms/RA/figures/RA_all_a.pdf:
+    command: figure_allocation_all_a(fits_figure_allocation_all_a)
+    plot:
+      width: 16
+      height: 9
+
+  ms/RA/figures/life_history.pdf:
+    command: figure_life_history(SummarySpp, SummarySppAge, fits_figure_allocation_all_a)
+    plot:
+      width: 8
+      height: 4
+
+  ms/RA/figures/investment.pdf:
+    command: figure_investment_weight(SummaryInd)
+    plot:
+      width: 16
+      height: 9
+
+  ms/RA/figures/leaf_weight.pdf:
+    command: figure_leaf_weight(Growth_all)
+    plot:
+      width: 16
+      height: 9
+
+  ms/RA/figures/abstract.pdf:
+    command: figure_graphical_abstract(SummarySppAge)
+    plot:
+      width: 8
+      height: 4
+
+  ms/RA/Wenk-RA-SI.pdf:
+    command: latex_build("ms/RA/Wenk-RA-SI.tex", clean=TRUE)
+
+  ms/RA/Wenk-RA-SI.tex:
+    knitr:
+      auto_figure_prefix: true
+      chdir: true
+    depends:
+      - SummaryInd
+      - SummarySpp
+      - SummarySppAge
+      - HarvestData
+      - Investment_FD_all
+      - PartsSummary_all
+      - ms/RA/Sup_Table_flowering_parts.csv
+      - BAER_GraphMaps
+      - BOLE_GraphMaps
+      - COER_GraphMaps
+      - EPMI_GraphMaps
+      - GRBU_GraphMaps
+      - GRSP_GraphMaps
+      - HATE_GraphMaps
+      - HEPU_GraphMaps
+      - LEES_GraphMaps
+      - PELA_GraphMaps
+      - PEPU_GraphMaps
+      - PHPH_GraphMaps
+      - PILI_GraphMaps
+      - PUTU_GraphMaps
+      - R/figures.R
+      - ms/RA/suppmat.sty
+      - ms/RA/figures/height.pdf
+      - ms/RA/figures/RA_demo_all.pdf
+      - ms/RA/figures/leaf_loss.pdf
+      - ms/map.pdf
+
+
+  ms/RA/figures/height.pdf:
+    command: figure_height(Growth_all)
+    plot:
+      width: 16
+      height: 9
+
+  ms/RA/figures/leaf_loss.pdf:
+    command: figure_LMA_leafloss(SummarySpp)
+    plot:
+      width: 4
+      height: 4
+
+  ms/map.pdf:
+    command: figure_site_map("data/sites.csv")
+    plot:
+      width: 4
+      height: 4
+
+  # Dataset construction --------------------------------------
+  IndividualsList:
+    command: read_csv("data/individuals.csv")
+
+  FlowerPartsData:
+    command: read_csv("data/flowerParts.csv")
+
+  Reproduction_raw:
+    command: read_csv("data/reproduction.csv")
+
+  ReproductionData:
+    command: filterForAllocation(Reproduction_raw, IndividualsList)
+
+  HarvestData_raw:
+    command: read_csv("data/harvest.csv")
+
+  HarvestData:
+    command: preprocessHarvest(HarvestData_raw, IndividualsList)
+
+  FloweringCategories:
+    command: read_csv("data/flowerCategories.csv")
+
+  MultiplierTable:
+    command: read_csv("data/multiplierTable.csv")
+
+  InvestmentCategories:
+    command: yaml.load_file("data/accessoryParts.yml")
+
+  LMA_1:
+    command:
+      - read_csv("data/LMA.csv")
+
+  LMA:
+    command:
+      - process_LMA(LMA_1)
+
+  wood_density_spp1:
+    command:
+      - read_csv("data/woodDensity.csv")
+
+  wood_density_spp:
+    command: process_wood_density(wood_density_spp1)
+
+  seedsize:
+    command:
+      - read_csv("data/seedsize.csv")
+
+  leavesPerLength_1:
+    command:
+      - read_csv("data/leaves_per_length.csv")
+
+  leavesPerLength:
+    command:
+      - process_leaves_per_length(leavesPerLength_1)
+
+  leafLoss_1:
+    command:
+      - read_csv("data/leaderGrowthLL.csv")
+
+  leafLoss:
+    command:
+      - process_leaf_loss(leafLoss_1, leavesPerLength)
+
+  variable_list:
+    command:
+      - read_csv("data/variable_metadata.csv")
+
+  SummaryInd_1:
+    command:
+      - combine_by_individual(IndividualsList, Growth_all, ReproductiveCosts_all, LMA, leafLoss, wood_density_spp, seedsize)
+
+  SummaryInd:
+    command:
+      - sort_by_variable(SummaryInd_1, variable_list)
+
+  SummarySppAge:
+    command: get_species_values(SummaryInd, groups=I(c("species", "age")))
+
+  SummarySpp:
+    command: get_species_values(SummaryInd, groups=I("species"))
+
+  SummaryCombine:
+    command: scale_individual_variable(SummaryInd, SummarySpp)
+
+  # Export of core dataset   --------------------------------------
+  export:
+    depends:
+      - export/SummaryInd.csv
+      - export/Variable_metadata.csv
+
+  export/Variable_metadata.csv:
+    command: write.csv(variable_list, target_name, row.names = FALSE)
+
+  export/SummaryInd.csv:
+    command: write.csv(SummaryInd, target_name, row.names = FALSE)
+
+  # A plain R version of this file, for those who don't like remake  -----------------------------------
+  analysis.R:
+    packages: remake
+    command: make_script(file=target_name)
