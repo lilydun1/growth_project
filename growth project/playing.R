@@ -31,18 +31,18 @@ growth_data <- HarvestData %>%
               species == "PELA" & age < 9.1 ~ "Y", 
               .default = "N")) %>% 
   mutate_all(~ifelse(is.nan(.), NA, .)) %>%  
-  filter(growth_diameter != -1, segment == 1) %>% 
+  filter(segment == 1) %>% 
   inner_join(LM_SM_allometric_trait_s_a, by = c("age" = "age", "species" = "species")) %>% 
   inner_join(LM_SM_allometric_trait_s, by = c("species" = "species")) %>% 
   inner_join(LA_SM_allometric_trait_s, by = c("species" = "species")) %>% 
   inner_join(species_meta, by = c("species" = "Abbreviation")) %>% 
-  #inner_join(GRValues_height, by = c("species" = "Spp")) %>% 
-  #inner_join(GRValues_total_weight, by = c("species" = "Spp")) %>% 
-  #inner_join(GRValues_diameter, by = c("species" = "Spp")) %>% 
+  inner_join(GRValues_max_d, by = c("species" = "Spp")) %>% 
+  inner_join(GRValues_max_h, by = c("species" = "Spp")) %>% 
+  inner_join(GRValues_max_w, by = c("species" = "Spp")) %>% 
   dplyr::select(-c("Family", "Common_name", "Previous_names", 
                    starts_with(c("m", "n", "slope_after_inflection", 
                                  "slope_before_inflection", 
-                                 "breakpoint", "breakpoint_se"))))
+                                 "breakpoint", "breakpoint_se", "GrowthRate_at"))))
 
 LM_SM_allometric_trait_s_a <- growth_data %>%
   ungroup() %>% 
@@ -79,7 +79,7 @@ growth_data$age <- as.character(growth_data$age)
 
 # plotting traits and diameter growth
 plotting_Dgrowth <- function(data = growth_data, GR, response) {
-  ggplot(data = data, aes(log10(.data[[response]]), log10(.data[[GR]] + 0.2))) +
+  ggplot(data = data, aes(log10(.data[[response]]), log10(.data[[GR]]))) +
     geom_point() + 
     geom_smooth(method = "lm") +
     stat_poly_eq(use_label(c("eq", "R2", "P",  "rr.confint.label")),
@@ -87,12 +87,11 @@ plotting_Dgrowth <- function(data = growth_data, GR, response) {
     theme(text = element_text(size = 15))
 }
 
-traits_Dgrowth_plots <- map(traits_3, ~plotting_Dgrowth(data = (growth_data), 
-                                                        response = .x, GR = "GR_at_std_age_total_weight"))
+traits_Dgrowth_plots <- map(traits_1, ~plotting_Dgrowth(response = .x, GR = "GR_w_max"))
 ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE)
 
 
-mod <- lm(log10(growth_diameter+0.2)~log10(LMA), data = (growth_data))
+ mod <- lm(log10(growth_diameter+0.2)~log10(LMA), data = (growth_data))
 tab_model(mod)
 
 #plotting traits and diameter growth with species and age
@@ -108,7 +107,7 @@ plotting_Dgrowth_spp_age <- function(data = growth_data, GR, response, colour) {
 }
 
 #growth diameter spp
-traits_Dgrowth_plots_spp <- map(traits_1, ~plotting_Dgrowth_spp_age(data = (growth_data),
+traits_Dgrowth_plots_spp <- map(traits_1, ~plotting_Dgrowth_spp_age(data = growth_data,
                                                                     response = .x, GR = "growth_diameter",
                                                                     colour = "age"))
 ggarrange(plotlist = traits_Dgrowth_plots_spp, common.legend = TRUE)
