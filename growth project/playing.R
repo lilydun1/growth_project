@@ -25,7 +25,7 @@ growth_data <- HarvestData %>%
               species == "PUTU" & age < 2.5 ~ "Y",
               species == "COER" & age < 5.1 ~ "Y",
               species == "HATE" & age < 9.1 ~ "Y",
-              species == "PHPY" & age < 2.5 ~ "Y",
+              species == "PHPH" & age < 2.5 ~ "Y",
               species == "BAER" & age < 9.1 ~ "Y",
               species == "PEPU" ~ "Y", 
               species == "PELA" & age < 9.1 ~ "Y", 
@@ -36,9 +36,9 @@ growth_data <- HarvestData %>%
   inner_join(LM_SM_allometric_trait_s, by = c("species" = "species")) %>% 
   inner_join(LA_SM_allometric_trait_s, by = c("species" = "species")) %>% 
   inner_join(species_meta, by = c("species" = "Abbreviation")) %>% 
-  inner_join(GRValues_max_d, by = c("species" = "Spp")) %>% 
-  inner_join(GRValues_max_h, by = c("species" = "Spp")) %>% 
-  inner_join(GRValues_max_w, by = c("species" = "Spp")) %>% 
+  #inner_join(GRValues_max_d, by = c("species" = "Spp")) %>% 
+  #inner_join(GRValues_max_h, by = c("species" = "Spp")) %>% 
+  #inner_join(GRValues_max_w, by = c("species" = "Spp")) %>% 
   dplyr::select(-c("Family", "Common_name", "Previous_names", 
                    starts_with(c("m", "n", "slope_after_inflection", 
                                  "slope_before_inflection", 
@@ -82,7 +82,7 @@ plotting_Dgrowth <- function(data = growth_data, GR, response) {
   ggplot(data = data, aes(log10(.data[[response]]), log10(.data[[GR]]))) +
     geom_point() + 
     geom_smooth(method = "lm") +
-    stat_poly_eq(use_label(c("eq", "R2", "P",  "rr.confint.label")),
+    stat_poly_eq(use_label(c("eq", "R2", "P")),
                  formula = formula1) +
     theme(text = element_text(size = 15))
 }
@@ -90,8 +90,9 @@ plotting_Dgrowth <- function(data = growth_data, GR, response) {
 traits_Dgrowth_plots <- map(traits_1, ~plotting_Dgrowth(response = .x, GR = "GR_w_max"))
 ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE)
 
+cor.test(growth_data$LMA, growth_data$wood_density)
 
- mod <- lm(log10(growth_diameter+0.2)~log10(LMA), data = (growth_data))
+mod <- lm(log10(growth_diameter+0.2)~log10(LMA), data = (growth_data))
 tab_model(mod)
 
 #plotting traits and diameter growth with species and age
