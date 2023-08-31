@@ -1,7 +1,17 @@
 
+all_data_growth %>% #filter(RA_max_1 < 0.5) %>% 
+  ggplot(aes(age, RA_max_1)) + 
+  geom_point() + facet_wrap(vars(species)) +
+  stat_smooth(method="glm", se=FALSE, method.args = list(family=binomial))
+
+df <- growth_data %>% 
+  filter(start_end == "end") %>% 
+  filter(age_half_reproduction == "Y")
+
+
 growth_data %>%
   filter(start_end == "end") %>% 
-  ggplot(aes((age), log10(height))) + 
+  ggplot(aes((age), log10())) + 
   geom_point() + 
   geom_smooth(se = FALSE) +
     facet_wrap(vars(species))

@@ -1,5 +1,6 @@
-library("tidyverse")
-library("ggeffects")
+pacman::p_load(tidyverse,ggeffects) 
+species_meta <- read_csv("data/species.csv")
+all_data_growth <- read_csv("SummaryInd.csv")
 
 growth_data <- HarvestData %>%  
   ungroup() %>% 
@@ -14,7 +15,7 @@ growth_data <- HarvestData %>%
             relative_growth_height = (height - lag(height))/lag(height), 
             ratio_leaf_stem = leaf_weight/stem_weight, 
             total_leaf_area = leaf_weight/LMA, 
-            colname = case_when(
+            age_half_reproduction = case_when(
               species == "BOLE" & age < 1.5 ~ "Y",
               species == "GRSP" & age < 2.5 ~ "Y",
               species == "PILI" & age < 1.5 ~ "Y",
@@ -35,14 +36,14 @@ growth_data <- HarvestData %>%
   inner_join(LM_SM_allometric_trait_s_a, by = c("age" = "age", "species" = "species")) %>% 
   inner_join(LM_SM_allometric_trait_s, by = c("species" = "species")) %>% 
   inner_join(LA_SM_allometric_trait_s, by = c("species" = "species")) %>% 
-  inner_join(species_meta, by = c("species" = "Abbreviation")) %>% 
+  inner_join(species_meta, by = c("species" = "Abbreviation")) #%>% 
   #inner_join(GRValues_max_d, by = c("species" = "Spp")) %>% 
   #inner_join(GRValues_max_h, by = c("species" = "Spp")) %>% 
   #inner_join(GRValues_max_w, by = c("species" = "Spp")) %>% 
-  dplyr::select(-c("Family", "Common_name", "Previous_names", 
-                   starts_with(c("m", "n", "slope_after_inflection", 
-                                 "slope_before_inflection", 
-                                 "breakpoint", "breakpoint_se", "GrowthRate_at"))))
+  #dplyr::select(-c("Family", "Common_name", "Previous_names", 
+  #                  starts_with(c("m", "n", "slope_after_inflection", 
+  #                                "slope_before_inflection", 
+  #                                "breakpoint", "breakpoint_se", "GrowthRate_at"))))
 
 LM_SM_allometric_trait_s_a <- growth_data %>%
   ungroup() %>% 
@@ -176,19 +177,19 @@ lm_sm_plot <- function(data = growth_data, x, y, colour) {
   theme(text = element_text(size = 15))
 }
 
-growth_data %>%
+all_data %>%
   ungroup() %>% 
-  filter(colname == "Y" ) %>% 
-  ggplot(aes(log10(stem_weight), log10(total_leaf_area), col = age)) + 
+  filter(RA_max_1 < 0.5) %>% 
+  ggplot(aes(log10(stem_weight), log10(leaf_weight), col = age)) + 
   geom_point() +
   geom_abline(intercept = 0, slope = 1) +  
   geom_smooth(method = "lm") +
   stat_poly_eq(use_label(c("eq", "R2", "P"))) +
   theme(text = element_text(size = 15)) +
-  facet_wrap("Species_name") +
+  facet_wrap("species") +
   ggtitle("no 50% allocation")
 
-df <- lm_sm_plot(data = (growth_data %>% filter(colname == "Y" )), x = "stem_weight", y = "total_leaf_area", colour ="Species_name")
+df <- lm_sm_plot(data = (all_data %>% filter(colname == "Y" )), x = "stem_weight", y = "total_leaf_area", colour ="Species_name")
 annotate_figure(df, "no 50% allocation")
 
 mod <- lm(log10(total_leaf_area)~log10(stem_weight), data = (growth_data))

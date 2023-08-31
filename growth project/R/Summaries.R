@@ -12,7 +12,7 @@ filterForAllocation <- function(data, IndividualsList) {
 
 # Get average LMA and leaf size for each species
 process_LMA <- function(LMA_raw) {
-  LMA <- filter(LMA_raw, species != "" & species != " ") %>% select(species,
+  LMA <- filter(LMA_raw, species != "" & species != " ") %>% dplyr::select(species,
     age, LMA, branch_age, leaf_number, leaf_area)
 
   LMA$leaf_size <- LMA$leaf_area/LMA$leaf_number
@@ -39,7 +39,7 @@ process_leaves_per_length <- function(leavesPerLength_raw) {
 # shoot_leaf_count_growth_shoot_length
 process_leaf_loss <- function(data_raw, leavesPerLength) {
 
-  data <- filter(data_raw, dont_use != "dead" & dont_use != "dont_use") %>% select(-age_exact,
+  data <- filter(data_raw, dont_use != "dead" & dont_use != "dont_use") %>% dplyr::select(-age_exact,
     -replicate, -site, -segment, -notes, -dont_use, -shoot_diameter_start,
     -shoot_diameter_end, -mm_lvs_spec, -count_lvs_spec)
 
@@ -64,14 +64,14 @@ process_leaf_loss <- function(data_raw, leavesPerLength) {
     shoot_leaf_count_new = shoot_leaf_count_new_count +
           (shoot_leaf_count_growth_shoot_length *  count_per_length),
     shoot_leaf_count = lvs_end + shoot_leaf_count_new) %>%
-  select(species, age, individual, shoot_length_start, growth_shoot_length,
+    dplyr::select(species, age, individual, shoot_length_start, growth_shoot_length,
          shoot_leaf_count_new_and_shed_count, shoot_leaf_count_start, prop_leaf_loss,
          shoot_leaf_count_new, shoot_leaf_count,lvs_end,lvs_end_count,lvs_end_length,count_per_length)
 }
 
 # Calculate average wood density by species
 process_wood_density <- function(wood_density_spp) {
-  wood <- filter(wood_density_spp, use == "use") %>% select(species, density) %>%
+  wood <- filter(wood_density_spp, use == "use") %>% dplyr::select(species, density) %>%
     group_by(species) %>% summarise_at(vars(density), mean)
   names(wood) <- c("species", "wood_density")
   wood
@@ -83,15 +83,15 @@ combine_by_individual <- function(IndividualsList, Growth_all, ReproductiveCosts
   
   # adding investment and accessory costs data to leafLoss dataframe to create a
   # dataframe with all individual level data
-  SummaryInd <- merge(select(IndividualsList, species, age, individual, mature),
-                      select(Growth_all, -species, -age), by = "individual", all = FALSE)
-  SummaryInd <- merge(SummaryInd, select(leafLoss, -species, -age), by = "individual",
+  SummaryInd <- merge(dplyr::select(IndividualsList, species, age, individual, mature),
+                      dplyr::select(Growth_all, -species, -age), by = "individual", all = FALSE)
+  SummaryInd <- merge(SummaryInd, dplyr::select(leafLoss, -species, -age), by = "individual",
                       all.x = TRUE)
-  SummaryInd <- merge(SummaryInd, select(ReproductiveCosts_all, -species, -age),
+  SummaryInd <- merge(SummaryInd, dplyr::select(ReproductiveCosts_all, -species, -age),
                       by = "individual", all.x = TRUE)
   SummaryInd <- merge(SummaryInd, LMA, by = c("species", "age"), all.x = TRUE)
   SummaryInd <- merge(SummaryInd, wood_density_spp, by = c("species"), all.x = TRUE)
-  SummaryInd <- merge(SummaryInd, select(seedsize, -propagule_weight, -pod_weight),
+  SummaryInd <- merge(SummaryInd, dplyr::select(seedsize, -propagule_weight, -pod_weight),
                       by = c("species"), all.x = TRUE)
   
   # Remove seedlings collected solely for allometric equations
@@ -346,3 +346,4 @@ scale_individual_variable <- function(SummaryInd, SummarySpp) {
   )
   
 }
+
