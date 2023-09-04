@@ -3,22 +3,22 @@
 pacman::p_load(tidyverse, tidyr, ggpubr, directlabels, segmented, corrplot)
 
 #for d = -log(0.2 * 1.4 + 1, base = 0.9)
-#for h =  -log(0.2 * 1.4 + 1, base = 0.9)*100
-#for tw = -log(0.3 * 1.4 + 1, base = 0.8)*1000
+#for h = -log(0.2 * 1.4 + 1, base = 0.9)
+#for tw = -log(0.3 * 1.4 + 1, base = 0.8)
 
 #### fit a curve for biomass vs. age ----
 
 Calc_GrowthCurve <- function(age, m, n){
   # age: x-axis
   # m, n: parameters 
-  diameter <- -log(n * age + 1, base = m) # adopted from Salomon et al 2017
-  return(diameter)
+  total_weight <- -log(n * age + 1, base = m) # adopted from Salomon et al 2017
+  return(total_weight)
 }
 
 # Defining the function to minimize
 
 minSS <- function(par, data){
-  out <- with(data, sum((data$diameter+log(par[2]*age+1, base=par[1]))^2))
+  out <- with(data, sum((data$total_weight+log(par[2]*age+1, base=par[1]))^2))
   return(out)
 }
 
@@ -35,11 +35,12 @@ Calc_GrowthRate <- function(std_age, m, n){
 
 ########## growth fits, values, and plots
 GRValueList <- list()  # this will be the list of growth rate values
+
 GCPlotList <- list()  # this will be a list of plots with a growth curve (biomass vs. age) fitted for all species
 GRPlotList <- list()  # this will be a list of plots with a growth rate vs. age curve fitted for all species
 GRFits <- list()
 
-curve_growth_data_filter <- all_data %>% 
+curve_growth_data_filter <- growth_data_all %>% 
   filter(RA_max_1 < 0.5)
 
 LoopOver <- unique(curve_growth_data_filter$species)
@@ -73,7 +74,7 @@ for (ll in LoopOver){
   
   # inflection point using segmented package
   # 
-  # out.lm <- lm(diameter~age, data=tmpe)
+  # out.lm <- lm(total_weight~age, data=tmpe)
   # o <- segmented(out.lm, seg.Z = ~age)
   # slope1 <- slope(o)$age[1]
   # slope2 <- slope(o)$age[2]
@@ -97,11 +98,11 @@ for (ll in LoopOver){
   
   GRFits[[ll]] <- fitline
   
-  GCPlotList[[ll]] <- ggplot(tmpe, aes(age, diameter)) + #plot a graph
+  GCPlotList[[ll]] <- ggplot(tmpe, aes(age, total_weight)) + #plot a graph
     geom_point(size=5, colour="black") + #colour the points for confidence in data
     geom_line(data = fitline, aes(xfit, yfit), colour = "black", linewidth=2.5, linetype="dashed") +
     #ggtitle(Species_names$Genus_Species[match(ll, Species_names$Spp)]) +
-    labs(x = "age / year", y = "diameter")
+    labs(x = "age / year", y = "total_weight")
   
   
   GRPlotList[[ll]] <- ggplot(tmpe) + #plot a graph
@@ -125,18 +126,35 @@ for (ll in LoopOver){
 dev.off()
 
 # Saving the growth rate values
-GRValues_w_1.4 <- do.call(rbind, GRValueList)  # compiling
+GRValues_w_age <- do.call(rbind, GRValueList)  # compiling
 
-GRValues_max_d <- GRValues_d_1.4 %>% 
-  mutate(across(where(is.numeric), round, 2),
-         GR_d_max = GrowthRate_at_std_age)
+GRValues_d <- GRValues_d %>% rename(GR_d = GrowthRate_at_std_age)
+GRValues_d_age <- GRValues_d_age %>% rename(GR_d_age = GrowthRate_at_std_age)
+GRValues_d_indiv <- GRValues_d_indiv %>% rename(GR_d_indiv = GrowthRate_at_std_age)
 
-GRValues_max_h <- GRValues_h_1.4 %>% 
-  mutate(across(where(is.numeric), round, 2), 
-         GR_h_max = ifelse(GrowthRate_at_std_age == 7262.15, 12524.89, GrowthRate_at_std_age)) 
+GR_d <- GRValues_d %>% 
+  inner_join(GRValues_d_age, by = c("Spp" = "Spp")) %>% 
+  inner_join(GRValues_d_indiv, by = c("Spp" = "Spp")) %>% 
+  dplyr::select(-c(starts_with(c("m", "n", "slope_after_inflection", 
+                  "slope_before_inflection", "breakpoint", "breakpoint_se", "GrowthRate_at"))))
 
-GRValues_max_w <- GRValues_w_1.4 %>% 
-  mutate(across(where(is.numeric), round, 1),
-         GR_w_max = ifelse(GrowthRate_at_std_age  == 25288538.9, 29711497.74, GrowthRate_at_std_age), 
-         GR_w_max = ifelse(GrowthRate_at_std_age  == 270624.3, 12365505.79, GrowthRate_at_std_age), 
-         GR_w_max = ifelse(GrowthRate_at_std_age  == 19882283.3, 24730747.68, GrowthRate_at_std_age))
+GRValues_h <- GRValues_h %>% rename(GR_h = GrowthRate_at_std_age)
+GRValues_h_age <- GRValues_h_age %>% rename(GR_h_age = GrowthRate_at_std_age)
+GRValues_h_indiv <- GRValues_h_indiv %>% rename(GR_h_indiv = GrowthRate_at_std_age)
+
+GR_h <- GRValues_h %>% 
+  inner_join(GRValues_h_age, by = c("Spp" = "Spp")) %>% 
+  inner_join(GRValues_h_indiv, by = c("Spp" = "Spp")) %>% 
+  dplyr::select(-c(starts_with(c("m", "n", "slope_after_inflection", 
+                                 "slope_before_inflection", "breakpoint", "breakpoint_se", "GrowthRate_at"))))
+
+GRValues_w <- GRValues_w %>% rename(GR_w = GrowthRate_at_std_age)
+GRValues_w_age <- GRValues_w_age %>% rename(GR_w_age = GrowthRate_at_std_age)
+GRValues_w_indiv <- GRValues_w_indiv %>% rename(GR_w_indiv = GrowthRate_at_std_age)
+
+GR_w <- GRValues_w %>% 
+  inner_join(GRValues_w_age, by = c("Spp" = "Spp")) %>% 
+  inner_join(GRValues_w_indiv, by = c("Spp" = "Spp")) %>% 
+  dplyr::select(-c(starts_with(c("m", "n", "slope_after_inflection", 
+                                 "slope_before_inflection", "breakpoint", "breakpoint_se", "GrowthRate_at"))))
+
