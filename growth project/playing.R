@@ -2,7 +2,7 @@ pacman::p_load(tidyverse,ggeffects, ggpmisc, ggpubr)
 species_meta <- read_csv("data/species.csv")
 all_data_growth <- read_csv("SummaryInd.csv")
 
-growth_data_all <- all_data_growth %>%  
+growth_data <- all_data_growth %>%  
   mutate(relative_growth_diameter = growth_stem_diameter/diameter_0,
             relative_growth_height = growth_height/height_0, 
             ratio_leaf_stem = leaf_weight/stem_weight,
@@ -62,13 +62,14 @@ traits_1 = c("LMA", "leaf_size", "wood_density")
 traits_2 = c("total_leaf_area", "leaf_weight", "stem_weight")
 traits_3 = c("ratio_leaf_stem", "LM_SM_slope_s_a", 
              "LM_SM_slope_s", "LA_SM_slope_s")
+GR_types = c("growth_stem_diameter", "growth_leaf_area", "growth_inv")
 
 formula1 <- y~x
 
 growth_data$age <- as.character(growth_data$age)
 
 # plotting traits and diameter growth
-plotting_Dgrowth <- function(data = growth_data_all, GR, response) {
+plotting_Dgrowth <- function(data = growth_data, GR, response) {
   ggplot(data = data, aes(log10(.data[[response]]), log10(.data[[GR]]))) +
     geom_point() + 
     geom_smooth(method = "lm") +
@@ -77,7 +78,10 @@ plotting_Dgrowth <- function(data = growth_data_all, GR, response) {
     theme(text = element_text(size = 15))
 }
 
-traits_Dgrowth_plots <- map(traits_1, ~plotting_Dgrowth(response = .x, GR = "growth_stem_diameter"))
+traits_Dgrowth_plots <- map(GR_types, ~plotting_Dgrowth(response = "LMA", GR = .x))
+ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE)
+
+traits_Dgrowth_plots <- map(traits_1, ~plotting_Dgrowth(response = .x, GR = "GR_w_indiv"))
 ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE)
 
 cor.test(growth_data$LMA, growth_data$wood_density)
@@ -166,9 +170,9 @@ lm_sm_plot <- function(data = growth_data, x, y, colour) {
   theme(text = element_text(size = 15))
 }
 
-all_data %>%
+growth_data %>%
   ungroup() %>% 
-  filter(RA_max_1 < 0.5) %>% 
+  #filter(RA_max_1 < 0.5) %>% 
   ggplot(aes(log10(stem_weight), log10(leaf_weight), col = age)) + 
   geom_point() +
   geom_abline(intercept = 0, slope = 1) +  

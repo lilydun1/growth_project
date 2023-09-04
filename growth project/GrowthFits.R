@@ -136,7 +136,9 @@ GR_d <- GRValues_d %>%
   inner_join(GRValues_d_age, by = c("Spp" = "Spp")) %>% 
   inner_join(GRValues_d_indiv, by = c("Spp" = "Spp")) %>% 
   dplyr::select(-c(starts_with(c("m", "n", "slope_after_inflection", 
-                  "slope_before_inflection", "breakpoint", "breakpoint_se", "GrowthRate_at"))))
+                  "slope_before_inflection", "breakpoint", "breakpoint_se", "GrowthRate_at")))) %>% 
+  rowwise() %>%
+  mutate(row_max = pmap_chr(across(everything()), ~ names(c(...)[which.max(c(...))])))
 
 GRValues_h <- GRValues_h %>% rename(GR_h = GrowthRate_at_std_age)
 GRValues_h_age <- GRValues_h_age %>% rename(GR_h_age = GrowthRate_at_std_age)
@@ -146,7 +148,9 @@ GR_h <- GRValues_h %>%
   inner_join(GRValues_h_age, by = c("Spp" = "Spp")) %>% 
   inner_join(GRValues_h_indiv, by = c("Spp" = "Spp")) %>% 
   dplyr::select(-c(starts_with(c("m", "n", "slope_after_inflection", 
-                                 "slope_before_inflection", "breakpoint", "breakpoint_se", "GrowthRate_at"))))
+                                 "slope_before_inflection", "breakpoint", "breakpoint_se", "GrowthRate_at")))) %>% 
+  rowwise() %>%
+  mutate(row_max = pmap_chr(across(everything()), ~ names(c(...)[which.max(c(...))])))
 
 GRValues_w <- GRValues_w %>% rename(GR_w = GrowthRate_at_std_age)
 GRValues_w_age <- GRValues_w_age %>% rename(GR_w_age = GrowthRate_at_std_age)
@@ -156,5 +160,6 @@ GR_w <- GRValues_w %>%
   inner_join(GRValues_w_age, by = c("Spp" = "Spp")) %>% 
   inner_join(GRValues_w_indiv, by = c("Spp" = "Spp")) %>% 
   dplyr::select(-c(starts_with(c("m", "n", "slope_after_inflection", 
-                                 "slope_before_inflection", "breakpoint", "breakpoint_se", "GrowthRate_at"))))
-
+                                 "slope_before_inflection", "breakpoint", "breakpoint_se", "GrowthRate_at")))) %>%
+  rowwise() %>%
+  mutate(row_max = pmap_chr(across(everything()), ~ names(c(...)[which.max(c(...))])))
