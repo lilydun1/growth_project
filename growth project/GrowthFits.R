@@ -11,14 +11,14 @@ pacman::p_load(tidyverse, tidyr, ggpubr, directlabels, segmented, corrplot)
 Calc_GrowthCurve <- function(age, m, n){
   # age: x-axis
   # m, n: parameters 
-  total_weight <- -log(n * age + 1, base = m) # adopted from Salomon et al 2017
-  return(total_weight)
+  height <- -log(n * age + 1, base = m) # adopted from Salomon et al 2017
+  return(height)
 }
 
 # Defining the function to minimize
 
 minSS <- function(par, data){
-  out <- with(data, sum((data$total_weight+log(par[2]*age+1, base=par[1]))^2))
+  out <- with(data, sum((data$height+log(par[2]*age+1, base=par[1]))^2))
   return(out)
 }
 
@@ -40,8 +40,7 @@ GCPlotList <- list()  # this will be a list of plots with a growth curve (biomas
 GRPlotList <- list()  # this will be a list of plots with a growth rate vs. age curve fitted for all species
 GRFits <- list()
 
-curve_growth_data_filter <- growth_data_all %>% 
-  filter(RA_max_1 < 0.5)
+curve_growth_data_filter <- growth_data_all
 
 LoopOver <- unique(curve_growth_data_filter$species)
 
@@ -68,13 +67,13 @@ for (ll in LoopOver){
   
   
   # Calculating (potentially maximum) growth rate at a standard age
-  std_age <- 1.4 # (unit=year) standard age
+  std_age <- 9 # (unit=year) standard age
   
   GrowthRate_std <- Calc_GrowthRate(std_age, m, n)
   
   # inflection point using segmented package
   # 
-  # out.lm <- lm(total_weight~age, data=tmpe)
+  # out.lm <- lm(height~age, data=tmpe)
   # o <- segmented(out.lm, seg.Z = ~age)
   # slope1 <- slope(o)$age[1]
   # slope2 <- slope(o)$age[2]
@@ -98,11 +97,11 @@ for (ll in LoopOver){
   
   GRFits[[ll]] <- fitline
   
-  GCPlotList[[ll]] <- ggplot(tmpe, aes(age, total_weight)) + #plot a graph
+  GCPlotList[[ll]] <- ggplot(tmpe, aes(age, height)) + #plot a graph
     geom_point(size=5, colour="black") + #colour the points for confidence in data
     geom_line(data = fitline, aes(xfit, yfit), colour = "black", linewidth=2.5, linetype="dashed") +
     #ggtitle(Species_names$Genus_Species[match(ll, Species_names$Spp)]) +
-    labs(x = "age / year", y = "total_weight")
+    labs(x = "age / year", y = "height")
   
   
   GRPlotList[[ll]] <- ggplot(tmpe) + #plot a graph
@@ -126,7 +125,7 @@ for (ll in LoopOver){
 dev.off()
 
 # Saving the growth rate values
-GRValues_w_age <- do.call(rbind, GRValueList)  # compiling
+GRValues_h_9 <- do.call(rbind, GRValueList)  # compiling
 
 GRValues_d <- GRValues_d %>% rename(GR_d = GrowthRate_at_std_age)
 GRValues_d_age <- GRValues_d_age %>% rename(GR_d_age = GrowthRate_at_std_age)

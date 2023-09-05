@@ -62,7 +62,7 @@ traits_1 = c("LMA", "leaf_size", "wood_density")
 traits_2 = c("total_leaf_area", "leaf_weight", "stem_weight")
 traits_3 = c("ratio_leaf_stem", "LM_SM_slope_s_a", 
              "LM_SM_slope_s", "LA_SM_slope_s")
-GR_types = c("growth_stem_diameter", "growth_leaf_area", "growth_inv")
+GR_types = c("growth_inv", "GR_w", "GR_w_age", "GR_w_indiv")
 
 formula1 <- y~x
 
