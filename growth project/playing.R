@@ -63,6 +63,7 @@ traits_2 = c("total_leaf_area", "leaf_weight", "stem_weight")
 traits_3 = c("ratio_leaf_stem", "LM_SM_slope_s_a", 
              "LM_SM_slope_s", "LA_SM_slope_s")
 GR_types = c("growth_inv", "GR_w", "GR_w_age", "GR_w_indiv")
+GR_types_abs = c("growth_stem_diameter", "growth_inv", "growth_leaf_area", "growth_height")
 
 formula1 <- y~x
 
@@ -125,38 +126,39 @@ spp_GR_traits <- function(spp) {
     ungroup()
   
 rsquared <- growth_data_spp %>% 
-  select(growth_diameter, LMA, leaf_weight, stem_weight, ratio_stem_leaf, 
-         SM_LM_slope) %>% 
-  map(~lm(log(growth_diameter+1.1) ~ .x, growth_data_spp)) %>% 
+  dplyr::select(growth_stem_diameter, LMA, leaf_weight, stem_weight, ratio_leaf_stem, 
+                LM_SM_slope_s_a) %>% 
+  map(~lm(log(growth_stem_diameter+1.1) ~ .x, growth_data_spp)) %>% 
   map(summary) %>% 
   map_dbl("r.squared") %>% 
   tidy %>% 
   rename(r.squared = x) %>% 
-  filter(names %in% c("LMA", "leaf_weight", "stem_weight", "ratio_stem_leaf", 
-                      "SM_LM_slope"))
+  filter(names %in% c("LMA", "leaf_weight", "stem_weight", "ratio_leaf_stem", 
+                      "LM_SM_slope_s_a"))
 
 pvalue <- growth_data_spp %>% 
-  select(growth_diameter, LMA, leaf_weight, stem_weight, ratio_stem_leaf, 
-         SM_LM_slope) %>% 
-  map(~lm(log(growth_diameter+1.1) ~ .x, growth_data_spp)) %>% 
+  dplyr::select(growth_stem_diameter, LMA, leaf_weight, stem_weight, ratio_leaf_stem, 
+                LM_SM_slope_s_a) %>% 
+  map(~lm(log(growth_stem_diameter+1.1) ~ .x, growth_data_spp)) %>% 
   map(summary) %>% 
   map(c("coefficients")) %>% 
   map_dbl(8) %>%
   tidy %>% 
   rename(p.value = x) %>% 
-  filter(names %in% c("LMA", "leaf_weight", "stem_weight", "ratio_stem_leaf", 
-                      "SM_LM_slope"))
+  filter(names %in% c("LMA", "leaf_weight", "stem_weight", "ratio_leaf_stem", 
+                      "LM_SM_slope_s_a"))
 
 data <- merge(rsquared, pvalue)
 }
 
 p_r2_traits_DGR <- growth_data %>% 
   ungroup() %>% 
-  select(species) %>% 
+  dplyr::select(species) %>% 
   distinct() %>% 
   mutate(summary = map(species, spp_GR_traits)) %>% 
   #unnest(summary) %>% 
-  mutate(across(where(is.numeric), round, 4))
+  mutate(across(where(is.numeric), round, 4)) %>% 
+  unnest()
 
 #stem versus leaf with age
 lm_sm_plot <- function(data = growth_data, x, y, colour) {

@@ -11,14 +11,14 @@ pacman::p_load(tidyverse, tidyr, ggpubr, directlabels, segmented, corrplot)
 Calc_GrowthCurve <- function(age, m, n){
   # age: x-axis
   # m, n: parameters 
-  height <- -log(n * age + 1, base = m) # adopted from Salomon et al 2017
-  return(height)
+  leaf_area <- -log(n * age + 1, base = m) # adopted from Salomon et al 2017
+  return(leaf_area)
 }
 
 # Defining the function to minimize
 
 minSS <- function(par, data){
-  out <- with(data, sum((data$height+log(par[2]*age+1, base=par[1]))^2))
+  out <- with(data, sum((data$leaf_area+log(par[2]*age+1, base=par[1]))^2))
   return(out)
 }
 
@@ -40,7 +40,7 @@ GCPlotList <- list()  # this will be a list of plots with a growth curve (biomas
 GRPlotList <- list()  # this will be a list of plots with a growth rate vs. age curve fitted for all species
 GRFits <- list()
 
-curve_growth_data_filter <- growth_data_all
+curve_growth_data_filter <- growth_data %>% filter(RA_max_1 < 0.5)
 
 LoopOver <- unique(curve_growth_data_filter$species)
 
@@ -73,7 +73,7 @@ for (ll in LoopOver){
   
   # inflection point using segmented package
   # 
-  # out.lm <- lm(height~age, data=tmpe)
+  # out.lm <- lm(leaf_area~age, data=tmpe)
   # o <- segmented(out.lm, seg.Z = ~age)
   # slope1 <- slope(o)$age[1]
   # slope2 <- slope(o)$age[2]
@@ -97,11 +97,11 @@ for (ll in LoopOver){
   
   GRFits[[ll]] <- fitline
   
-  GCPlotList[[ll]] <- ggplot(tmpe, aes(age, height)) + #plot a graph
+  GCPlotList[[ll]] <- ggplot(tmpe, aes(age, leaf_area)) + #plot a graph
     geom_point(size=5, colour="black") + #colour the points for confidence in data
     geom_line(data = fitline, aes(xfit, yfit), colour = "black", linewidth=2.5, linetype="dashed") +
     #ggtitle(Species_names$Genus_Species[match(ll, Species_names$Spp)]) +
-    labs(x = "age / year", y = "height")
+    labs(x = "age / year", y = "leaf_area")
   
   
   GRPlotList[[ll]] <- ggplot(tmpe) + #plot a graph
@@ -125,7 +125,7 @@ for (ll in LoopOver){
 dev.off()
 
 # Saving the growth rate values
-GRValues_h_9 <- do.call(rbind, GRValueList)  # compiling
+GRValues_la_indiv <- do.call(rbind, GRValueList)  # compiling
 
 GRValues_d <- GRValues_d %>% rename(GR_d = GrowthRate_at_std_age)
 GRValues_d_age <- GRValues_d_age %>% rename(GR_d_age = GrowthRate_at_std_age)
@@ -158,6 +158,18 @@ GRValues_w_indiv <- GRValues_w_indiv %>% rename(GR_w_indiv = GrowthRate_at_std_a
 GR_w <- GRValues_w %>% 
   inner_join(GRValues_w_age, by = c("Spp" = "Spp")) %>% 
   inner_join(GRValues_w_indiv, by = c("Spp" = "Spp")) %>% 
+  dplyr::select(-c(starts_with(c("m", "n", "slope_after_inflection", 
+                                 "slope_before_inflection", "breakpoint", "breakpoint_se", "GrowthRate_at")))) %>%
+  rowwise() %>%
+  mutate(row_max = pmap_chr(across(everything()), ~ names(c(...)[which.max(c(...))])))
+
+GRValues_la <- GRValues_la %>% rename(GR_la = GrowthRate_at_std_age)
+GRValues_la_age <- GRValues_la_age %>% rename(GR_la_age = GrowthRate_at_std_age)
+GRValues_la_indiv <- GRValues_la_indiv %>% rename(GR_la_indiv = GrowthRate_at_std_age)
+
+GR_la <- GRValues_la %>% 
+  inner_join(GRValues_la_age, by = c("Spp" = "Spp")) %>% 
+  inner_join(GRValues_la_indiv, by = c("Spp" = "Spp")) %>% 
   dplyr::select(-c(starts_with(c("m", "n", "slope_after_inflection", 
                                  "slope_before_inflection", "breakpoint", "breakpoint_se", "GrowthRate_at")))) %>%
   rowwise() %>%
