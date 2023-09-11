@@ -1,4 +1,20 @@
 
+GR_types_all = c("growth_stem_diameter", "GR_d","GR_d_age", "GR_d_50", "GR_d_25","GR_d_75",
+                 "growth_height", "GR_h","GR_h_age", "GR_h_50", "GR_h_25", "GR_h_75",
+                 "growth_inv", "GR_w", "GR_w_age", "GR_w_50", "GR_w_25", "GR_w_75", 
+                 "growth_leaf_area", "GR_la", "GR_la_age", "GR_la_50", "GR_la_25", "GR_la_75")
+traits_Dgrowth_plots <- map(GR_types_all, ~plotting_Dgrowth(response = "LMA", GR = .x))
+ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, ncol=6,nrow=4)
+
+
+
+growth_data %>% 
+  ggplot(aes(log10(GR_w), log10(growth_inv)))+
+  geom_point() +
+  geom_smooth(method ="lm")
+
+
+
 all_data_growth %>% #filter(RA_max_1 < 0.5) %>% 
   ggplot(aes(age, RA_max_1)) + 
   geom_point() + facet_wrap(vars(species)) +
@@ -56,5 +72,6 @@ lma_g <- growth_data %>%
          slope = map_dbl(coeffs, 2))
 
 d_mod <- lm(pct_change ~ age, df)
+
 
   

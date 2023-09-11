@@ -40,7 +40,7 @@ GCPlotList <- list()  # this will be a list of plots with a growth curve (biomas
 GRPlotList <- list()  # this will be a list of plots with a growth rate vs. age curve fitted for all species
 GRFits <- list()
 
-curve_growth_data_filter <- growth_data %>% filter(RA_max_1 < 0.5)
+curve_growth_data_filter <- growth_data %>% filter(RA_max_1 < 0.75)
 
 LoopOver <- unique(curve_growth_data_filter$species)
 
@@ -49,7 +49,7 @@ for (ll in LoopOver){
 
   
   # Initialization values of parameters
-  mypara = c(0.9, 0.2) #do not know if these will work for growth data but can try
+  mypara = c(0.8, 0.3) #do not know if these will work for growth data but can try
   
   # Optimizing fitting by testing different parameters      
   result <- optim(par = mypara,  minSS, data=tmpe)
@@ -67,7 +67,7 @@ for (ll in LoopOver){
   
   
   # Calculating (potentially maximum) growth rate at a standard age
-  std_age <- 9 # (unit=year) standard age
+  std_age <- 1.4 # (unit=year) standard age
   
   GrowthRate_std <- Calc_GrowthRate(std_age, m, n)
   
@@ -110,7 +110,7 @@ for (ll in LoopOver){
     labs(x = "age / year", y = "growth rate / /year") 
 }
 
-############ Exporting species-specific growth values and plots
+  ############ Exporting species-specific growth values and plots
 # Saving the curves and fits
 pdf("GCFits.pdf")
 for (ll in LoopOver){
@@ -125,15 +125,19 @@ for (ll in LoopOver){
 dev.off()
 
 # Saving the growth rate values
-GRValues_la_indiv <- do.call(rbind, GRValueList)  # compiling
+GRValues_la_75 <- do.call(rbind, GRValueList)  # compiling
 
 GRValues_d <- GRValues_d %>% rename(GR_d = GrowthRate_at_std_age)
 GRValues_d_age <- GRValues_d_age %>% rename(GR_d_age = GrowthRate_at_std_age)
-GRValues_d_indiv <- GRValues_d_indiv %>% rename(GR_d_indiv = GrowthRate_at_std_age)
+GRValues_d_50 <- GRValues_d_50 %>% rename(GR_d_50 = GrowthRate_at_std_age)
+GRValues_d_25 <- GRValues_d_25 %>% rename(GR_d_25 = GrowthRate_at_std_age)
+GRValues_d_75 <- GRValues_d_75 %>% rename(GR_d_75 = GrowthRate_at_std_age)
 
 GR_d <- GRValues_d %>% 
   inner_join(GRValues_d_age, by = c("Spp" = "Spp")) %>% 
-  inner_join(GRValues_d_indiv, by = c("Spp" = "Spp")) %>% 
+  inner_join(GRValues_d_50, by = c("Spp" = "Spp")) %>% 
+  inner_join(GRValues_d_25, by = c("Spp" = "Spp")) %>%
+  inner_join(GRValues_d_75, by = c("Spp" = "Spp")) %>% 
   dplyr::select(-c(starts_with(c("m", "n", "slope_after_inflection", 
                   "slope_before_inflection", "breakpoint", "breakpoint_se", "GrowthRate_at")))) %>% 
   rowwise() %>%
@@ -141,11 +145,15 @@ GR_d <- GRValues_d %>%
 
 GRValues_h <- GRValues_h %>% rename(GR_h = GrowthRate_at_std_age)
 GRValues_h_age <- GRValues_h_age %>% rename(GR_h_age = GrowthRate_at_std_age)
-GRValues_h_indiv <- GRValues_h_indiv %>% rename(GR_h_indiv = GrowthRate_at_std_age)
+GRValues_h_50 <- GRValues_h_50 %>% rename(GR_h_50 = GrowthRate_at_std_age)
+GRValues_h_25 <- GRValues_h_25 %>% rename(GR_h_25 = GrowthRate_at_std_age)
+GRValues_h_75 <- GRValues_h_75 %>% rename(GR_h_75 = GrowthRate_at_std_age)
 
 GR_h <- GRValues_h %>% 
   inner_join(GRValues_h_age, by = c("Spp" = "Spp")) %>% 
-  inner_join(GRValues_h_indiv, by = c("Spp" = "Spp")) %>% 
+  inner_join(GRValues_h_50, by = c("Spp" = "Spp")) %>% 
+  inner_join(GRValues_h_25, by = c("Spp" = "Spp")) %>% 
+  inner_join(GRValues_h_75, by = c("Spp" = "Spp")) %>% 
   dplyr::select(-c(starts_with(c("m", "n", "slope_after_inflection", 
                                  "slope_before_inflection", "breakpoint", "breakpoint_se", "GrowthRate_at")))) %>% 
   rowwise() %>%
@@ -153,11 +161,15 @@ GR_h <- GRValues_h %>%
 
 GRValues_w <- GRValues_w %>% rename(GR_w = GrowthRate_at_std_age)
 GRValues_w_age <- GRValues_w_age %>% rename(GR_w_age = GrowthRate_at_std_age)
-GRValues_w_indiv <- GRValues_w_indiv %>% rename(GR_w_indiv = GrowthRate_at_std_age)
+GRValues_w_50 <- GRValues_w_50 %>% rename(GR_w_50 = GrowthRate_at_std_age)
+GRValues_w_25 <- GRValues_w_25 %>% rename(GR_w_25 = GrowthRate_at_std_age)
+GRValues_w_75 <- GRValues_w_75 %>% rename(GR_w_75 = GrowthRate_at_std_age)
 
 GR_w <- GRValues_w %>% 
   inner_join(GRValues_w_age, by = c("Spp" = "Spp")) %>% 
-  inner_join(GRValues_w_indiv, by = c("Spp" = "Spp")) %>% 
+  inner_join(GRValues_w_50, by = c("Spp" = "Spp")) %>% 
+  inner_join(GRValues_w_25, by = c("Spp" = "Spp")) %>% 
+  inner_join(GRValues_w_75, by = c("Spp" = "Spp")) %>% 
   dplyr::select(-c(starts_with(c("m", "n", "slope_after_inflection", 
                                  "slope_before_inflection", "breakpoint", "breakpoint_se", "GrowthRate_at")))) %>%
   rowwise() %>%
@@ -165,11 +177,15 @@ GR_w <- GRValues_w %>%
 
 GRValues_la <- GRValues_la %>% rename(GR_la = GrowthRate_at_std_age)
 GRValues_la_age <- GRValues_la_age %>% rename(GR_la_age = GrowthRate_at_std_age)
-GRValues_la_indiv <- GRValues_la_indiv %>% rename(GR_la_indiv = GrowthRate_at_std_age)
+GRValues_la_50 <- GRValues_la_50 %>% rename(GR_la_50 = GrowthRate_at_std_age)
+GRValues_la_25 <- GRValues_la_25 %>% rename(GR_la_25 = GrowthRate_at_std_age)
+GRValues_la_75 <- GRValues_la_75 %>% rename(GR_la_75 = GrowthRate_at_std_age)
 
 GR_la <- GRValues_la %>% 
   inner_join(GRValues_la_age, by = c("Spp" = "Spp")) %>% 
-  inner_join(GRValues_la_indiv, by = c("Spp" = "Spp")) %>% 
+  inner_join(GRValues_la_50, by = c("Spp" = "Spp")) %>% 
+  inner_join(GRValues_la_25, by = c("Spp" = "Spp")) %>% 
+  inner_join(GRValues_la_75, by = c("Spp" = "Spp")) %>% 
   dplyr::select(-c(starts_with(c("m", "n", "slope_after_inflection", 
                                  "slope_before_inflection", "breakpoint", "breakpoint_se", "GrowthRate_at")))) %>%
   rowwise() %>%

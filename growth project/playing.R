@@ -29,6 +29,7 @@ growth_data <- all_data_growth %>%
   inner_join(GR_d, by = c("species" = "Spp")) %>% 
   inner_join(GR_h, by = c("species" = "Spp")) %>% 
   inner_join(GR_w, by = c("species" = "Spp")) %>% 
+  inner_join(GR_la, by = c("species" = "Spp")) %>%
   dplyr::select(-c("Family", "Common_name", "Previous_names", 
                    starts_with(c("m", "n", "slope_after_inflection", 
                                 "slope_before_inflection", 
@@ -62,8 +63,8 @@ traits_1 = c("LMA", "leaf_size", "wood_density")
 traits_2 = c("total_leaf_area", "leaf_weight", "stem_weight")
 traits_3 = c("ratio_leaf_stem", "LM_SM_slope_s_a", 
              "LM_SM_slope_s", "LA_SM_slope_s")
-GR_types = c("growth_inv", "GR_w", "GR_w_age", "GR_w_indiv")
-GR_types_abs = c("growth_stem_diameter", "growth_inv", "growth_leaf_area", "growth_height")
+GR_types = c("growth_height", "GR_h_age", "GR_h_indiv", "GR_h_indiv_25")
+GR_types_abs = c("growth_stem_diameter", "growth_height", "growth_inv","growth_leaf_area")
 
 formula1 <- y~x
 
@@ -79,7 +80,7 @@ plotting_Dgrowth <- function(data = growth_data, GR, response) {
     theme(text = element_text(size = 15))
 }
 
-traits_Dgrowth_plots <- map(GR_types, ~plotting_Dgrowth(response = "LMA", GR = .x))
+traits_Dgrowth_plots <- map(GR_types_abs, ~plotting_Dgrowth(response = "LMA", GR = .x))
 ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE)
 
 traits_Dgrowth_plots <- map(traits_1, ~plotting_Dgrowth(response = .x, GR = "GR_w_indiv"))
