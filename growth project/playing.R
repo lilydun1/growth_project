@@ -72,7 +72,7 @@ growth_data$age <- as.character(growth_data$age)
 
 # plotting traits and diameter growth
 plotting_Dgrowth <- function(data = growth_data, GR, response) {
-  ggplot(data = data, aes(log10(.data[[response]]), log10(.data[[GR]]))) +
+  ggplot(data = data, aes(log10(.data[[response]]), log10(.data[[GR]]), col = age)) +
     geom_point() + 
     geom_smooth(method = "lm") +
     stat_poly_eq(use_label(c("eq", "R2", "P")),
@@ -80,7 +80,7 @@ plotting_Dgrowth <- function(data = growth_data, GR, response) {
     theme(text = element_text(size = 15))
 }
 
-traits_Dgrowth_plots <- map(GR_types_abs, ~plotting_Dgrowth(response = "LMA", GR = .x))
+traits_Dgrowth_plots <- map(GR_types_abs, ~plotting_Dgrowth(response = "wood_density", GR = .x))
 ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE)
 
 traits_Dgrowth_plots <- map(traits_1, ~plotting_Dgrowth(response = .x, GR = "GR_w_indiv"))
