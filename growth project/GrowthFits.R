@@ -11,14 +11,14 @@ pacman::p_load(tidyverse, tidyr, ggpubr, directlabels, segmented, corrplot)
 Calc_GrowthCurve <- function(age, m, n){
   # age: x-axis
   # m, n: parameters 
-  leaf_area <- -log(n * age + 1, base = m) # adopted from Salomon et al 2017
-  return(leaf_area)
+  diameter <- -log(n * age + 1, base = m) # adopted from Salomon et al 2017
+  return(diameter)
 }
 
 # Defining the function to minimize
 
 minSS <- function(par, data){
-  out <- with(data, sum((data$leaf_area+log(par[2]*age+1, base=par[1]))^2))
+  out <- with(data, sum((data$diameter+log(par[2]*age+1, base=par[1]))^2))
   return(out)
 }
 
@@ -40,7 +40,7 @@ GCPlotList <- list()  # this will be a list of plots with a growth curve (biomas
 GRPlotList <- list()  # this will be a list of plots with a growth rate vs. age curve fitted for all species
 GRFits <- list()
 
-curve_growth_data_filter <- growth_data %>% filter(RA_max_1 < 0.75)
+curve_growth_data_filter <- growth_data %>% filter(age_half_reproduction == "Y")
 
 LoopOver <- unique(curve_growth_data_filter$species)
 
@@ -73,7 +73,7 @@ for (ll in LoopOver){
   
   # inflection point using segmented package
   # 
-  # out.lm <- lm(leaf_area~age, data=tmpe)
+  # out.lm <- lm(diameter~age, data=tmpe)
   # o <- segmented(out.lm, seg.Z = ~age)
   # slope1 <- slope(o)$age[1]
   # slope2 <- slope(o)$age[2]
@@ -97,11 +97,11 @@ for (ll in LoopOver){
   
   GRFits[[ll]] <- fitline
   
-  GCPlotList[[ll]] <- ggplot(tmpe, aes(age, leaf_area)) + #plot a graph
+  GCPlotList[[ll]] <- ggplot(tmpe, aes(age, diameter)) + #plot a graph
     geom_point(size=5, colour="black") + #colour the points for confidence in data
     geom_line(data = fitline, aes(xfit, yfit), colour = "black", linewidth=2.5, linetype="dashed") +
     #ggtitle(Species_names$Genus_Species[match(ll, Species_names$Spp)]) +
-    labs(x = "age / year", y = "leaf_area")
+    labs(x = "age / year", y = "diameter")
   
   
   GRPlotList[[ll]] <- ggplot(tmpe) + #plot a graph
@@ -125,12 +125,12 @@ for (ll in LoopOver){
 dev.off()
 
 # Saving the growth rate values
-GRValues_la_75 <- do.call(rbind, GRValueList)  # compiling
+GRValues_d_age <- do.call(rbind, GRValueList)  # compiling
 
 GRValues_d <- GRValues_d %>% rename(GR_d = GrowthRate_at_std_age)
 GRValues_d_age <- GRValues_d_age %>% rename(GR_d_age = GrowthRate_at_std_age)
-GRValues_d_50 <- GRValues_d_50 %>% rename(GR_d_50 = GrowthRate_at_std_age)
 GRValues_d_25 <- GRValues_d_25 %>% rename(GR_d_25 = GrowthRate_at_std_age)
+GRValues_d_50 <- GRValues_d_50 %>% rename(GR_d_50 = GrowthRate_at_std_age)
 GRValues_d_75 <- GRValues_d_75 %>% rename(GR_d_75 = GrowthRate_at_std_age)
 
 GR_d <- GRValues_d %>% 
