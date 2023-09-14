@@ -2,6 +2,9 @@ pacman::p_load(tidyverse,ggeffects, ggpmisc, ggpubr)
 species_meta <- read_csv("data/species.csv")
 all_data_growth <- read_csv("SummaryInd.csv")
 
+all_data_growth %>% 
+  ggplot(aes(species, age)) + geom_point()
+
 growth_data <- all_data_growth %>%  
   mutate(relative_growth_diameter = growth_stem_diameter/diameter_0,
             relative_growth_height = growth_height/height_0, 
@@ -30,10 +33,23 @@ growth_data <- all_data_growth %>%
   inner_join(GR_h, by = c("species" = "Spp")) %>% 
   inner_join(GR_w, by = c("species" = "Spp")) %>% 
   inner_join(GR_la, by = c("species" = "Spp")) %>%
+  inner_join(GR_d_each_age, by = c("species" = "Spp", "age" = "age")) %>% 
+  inner_join(GR_h_each_age, by = c("species" = "Spp", "age" = "age")) %>% 
+  inner_join(GR_w_each_age, by = c("species" = "Spp", "age" = "age")) %>% 
+  inner_join(GR_la_each_age, by = c("species" = "Spp", "age" = "age")) %>%
   dplyr::select(-c("Family", "Common_name", "Previous_names", 
                    starts_with(c("m", "n", "slope_after_inflection", 
                                 "slope_before_inflection", 
-                                "breakpoint", "breakpoint_se", "GrowthRate_at"))))
+                                "breakpoint", "breakpoint_se", "GrowthRate_at")))) %>% 
+  group_by(species) %>%   
+  mutate(GR_d_max = max(GR_d_each_age), GR_h_max = max(GR_h_each_age), 
+         GR_w_max = max(GR_w_each_age), GR_la_max = max(GR_la_each_age), 
+         GR_d = case_when(species == "PHPH" ~ GR_d_max), 
+         GR_h = case_when(species == "PHPH" ~ GR_h_max), 
+         GR_w = case_when(species == "PHPH" ~ GR_w_max), 
+         GR_la = case_when(species == "PHPH" ~ GR_la_max)) %>% 
+  ungroup()
+  
 
 LM_SM_allometric_trait_s_a <- all_data_growth %>%
   ungroup() %>% 
@@ -76,11 +92,11 @@ plotting_Dgrowth <- function(data = growth_data, GR, response) {
     geom_point() + 
     geom_smooth(method = "lm") +
     stat_poly_eq(use_label(c("eq", "R2", "P")),
-                 formula = formula1) +
+                 formula = formula1, size = 5) +
     theme(text = element_text(size = 15))
 }
 
-traits_Dgrowth_plots <- map(GR_types, ~plotting_Dgrowth(response = "LMA", GR = .x))
+traits_Dgrowth_plots <- map(GR_types_abs, ~plotting_Dgrowth(response = "LMA", GR = .x))
 ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE)
 
 traits_Dgrowth_plots <- map(traits_1, ~plotting_Dgrowth(response = .x, GR = "GR_w_indiv"))
@@ -176,14 +192,14 @@ lm_sm_plot <- function(data = growth_data, x, y, colour) {
 growth_data %>%
   ungroup() %>% 
   #filter(RA_max_1 < 0.5) %>% 
-  ggplot(aes(log10(stem_weight), log10(leaf_weight), col = age)) + 
+  ggplot(aes(log10(stem_weight), log10(leaf_area))) + 
   geom_point() +
   geom_abline(intercept = 0, slope = 1) +  
   geom_smooth(method = "lm") +
   stat_poly_eq(use_label(c("eq", "R2", "P"))) +
-  theme(text = element_text(size = 15)) +
-  facet_wrap("species") +
-  ggtitle("no 50% allocation")
+  theme(text = element_text(size = 15)) #+
+  facet_wrap("Species_name") #+
+  #ggtitle("no 50% allocation")
 
 df <- lm_sm_plot(data = (all_data %>% filter(colname == "Y" )), x = "stem_weight", y = "total_leaf_area", colour ="Species_name")
 annotate_figure(df, "no 50% allocation")

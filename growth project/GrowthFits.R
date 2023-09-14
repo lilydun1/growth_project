@@ -40,7 +40,7 @@ GCPlotList <- list()  # this will be a list of plots with a growth curve (biomas
 GRPlotList <- list()  # this will be a list of plots with a growth rate vs. age curve fitted for all species
 GRFits <- list()
 
-curve_growth_data_filter <- growth_data %>% filter(age_half_reproduction == "Y")
+curve_growth_data_filter <- growth_data
 
 LoopOver <- unique(curve_growth_data_filter$species)
 
@@ -125,7 +125,7 @@ for (ll in LoopOver){
 dev.off()
 
 # Saving the growth rate values
-GRValues_d_age <- do.call(rbind, GRValueList)  # compiling
+GRValues_d <- do.call(rbind, GRValueList)  # compiling
 
 GRValues_d <- GRValues_d %>% rename(GR_d = GrowthRate_at_std_age)
 GRValues_d_age <- GRValues_d_age %>% rename(GR_d_age = GrowthRate_at_std_age)
@@ -145,8 +145,8 @@ GR_d <- GRValues_d %>%
 
 GRValues_h <- GRValues_h %>% rename(GR_h = GrowthRate_at_std_age)
 GRValues_h_age <- GRValues_h_age %>% rename(GR_h_age = GrowthRate_at_std_age)
-GRValues_h_50 <- GRValues_h_50 %>% rename(GR_h_50 = GrowthRate_at_std_age)
 GRValues_h_25 <- GRValues_h_25 %>% rename(GR_h_25 = GrowthRate_at_std_age)
+GRValues_h_50 <- GRValues_h_50 %>% rename(GR_h_50 = GrowthRate_at_std_age)
 GRValues_h_75 <- GRValues_h_75 %>% rename(GR_h_75 = GrowthRate_at_std_age)
 
 GR_h <- GRValues_h %>% 
@@ -161,8 +161,8 @@ GR_h <- GRValues_h %>%
 
 GRValues_w <- GRValues_w %>% rename(GR_w = GrowthRate_at_std_age)
 GRValues_w_age <- GRValues_w_age %>% rename(GR_w_age = GrowthRate_at_std_age)
-GRValues_w_50 <- GRValues_w_50 %>% rename(GR_w_50 = GrowthRate_at_std_age)
 GRValues_w_25 <- GRValues_w_25 %>% rename(GR_w_25 = GrowthRate_at_std_age)
+GRValues_w_50 <- GRValues_w_50 %>% rename(GR_w_50 = GrowthRate_at_std_age)
 GRValues_w_75 <- GRValues_w_75 %>% rename(GR_w_75 = GrowthRate_at_std_age)
 
 GR_w <- GRValues_w %>% 
@@ -177,8 +177,8 @@ GR_w <- GRValues_w %>%
 
 GRValues_la <- GRValues_la %>% rename(GR_la = GrowthRate_at_std_age)
 GRValues_la_age <- GRValues_la_age %>% rename(GR_la_age = GrowthRate_at_std_age)
-GRValues_la_50 <- GRValues_la_50 %>% rename(GR_la_50 = GrowthRate_at_std_age)
 GRValues_la_25 <- GRValues_la_25 %>% rename(GR_la_25 = GrowthRate_at_std_age)
+GRValues_la_50 <- GRValues_la_50 %>% rename(GR_la_50 = GrowthRate_at_std_age)
 GRValues_la_75 <- GRValues_la_75 %>% rename(GR_la_75 = GrowthRate_at_std_age)
 
 GR_la <- GRValues_la %>% 
@@ -190,3 +190,144 @@ GR_la <- GRValues_la %>%
                                  "slope_before_inflection", "breakpoint", "breakpoint_se", "GrowthRate_at")))) %>%
   rowwise() %>%
   mutate(row_max = pmap_chr(across(everything()), ~ names(c(...)[which.max(c(...))])))
+
+GRValues_d_a1.4 <- GRValues_d_a1.4 %>% 
+  mutate(age = 1.4) %>% 
+  #filter(!Spp %in% c("PHPH")) %>%
+  rename(GR_d_each_age = GrowthRate_at_std_age)
+
+GRValues_d_a2.4 <- GRValues_d_a2.4 %>% 
+  mutate(age = 2.4) %>% 
+  rename(GR_d_each_age = GrowthRate_at_std_age)
+
+GRValues_d_a5 <- GRValues_d_a5 %>% 
+  mutate(age = 5)%>% 
+  rename(GR_d_each_age = GrowthRate_at_std_age)
+
+GRValues_d_a7 <- GRValues_d_a7 %>% 
+  mutate(age = 7)%>% 
+  rename(GR_d_each_age = GrowthRate_at_std_age)
+
+GRValues_d_a9 <- GRValues_d_a9 %>% 
+  mutate(age = 9)%>% 
+  filter(!Spp %in% c("PILI")) #%>% 
+  #rename(GR_d_each_age = GrowthRate_at_std_age)
+
+GRValues_d_a32 <- GRValues_d_a32 %>% 
+  mutate(age = 32) %>% 
+  filter(!Spp %in% c("BOLE", "COER", "GRSP", "HEPU", "PILI"))%>% 
+  rename(GR_d_each_age = GrowthRate_at_std_age)
+
+GR_d_each_age <- GRValues_d_a1.4 %>% 
+  bind_rows(GRValues_d_a2.4) %>% 
+  bind_rows(GRValues_d_a5) %>% 
+  bind_rows(GRValues_d_a7) %>% 
+  bind_rows(GRValues_d_a9) %>% 
+  bind_rows(GRValues_d_a32) %>% 
+  as_tibble()
+
+GRValues_h_a1.4 <- GRValues_h_a1.4 %>% 
+  mutate(age = 1.4) %>% 
+  #filter(!Spp %in% c("PHPH")) %>%
+  rename(GR_h_each_age = GrowthRate_at_std_age)
+
+GRValues_h_a2.4 <- GRValues_h_a2.4 %>% 
+  mutate(age = 2.4)%>% 
+  rename(GR_h_each_age = GrowthRate_at_std_age)
+
+GRValues_h_a5 <- GRValues_h_a5 %>% 
+  mutate(age = 5)%>% 
+  rename(GR_h_each_age = GrowthRate_at_std_age)
+
+GRValues_h_a7 <- GRValues_h_a7 %>% 
+  mutate(age = 7)%>% 
+  rename(GR_h_each_age = GrowthRate_at_std_age)
+
+GRValues_h_a9 <- GRValues_h_a9 %>% 
+  mutate(age = 9) %>% 
+  filter(!Spp %in% c("PILI")) #%>% 
+  #rename(GR_h_each_age = GrowthRate_at_std_age)
+
+GRValues_h_a32 <- GRValues_h_a32 %>% 
+  mutate(age = 32) %>% 
+  filter(!Spp %in% c("BOLE", "COER", "GRSP", "HEPU", "PILI"))%>% 
+  rename(GR_h_each_age = GrowthRate_at_std_age)
+
+GR_h_each_age <- GRValues_h_a1.4 %>% 
+  bind_rows(GRValues_h_a2.4) %>% 
+  bind_rows(GRValues_h_a5) %>% 
+  bind_rows(GRValues_h_a7) %>% 
+  bind_rows(GRValues_h_a9) %>% 
+  bind_rows(GRValues_h_a32) %>% 
+  as_tibble()
+
+GRValues_w_a1.4 <- GRValues_w_a1.4 %>% 
+  mutate(age = 1.4) %>%
+  #filter(!Spp %in% c("PHPH")) %>% 
+  rename(GR_w_each_age = GrowthRate_at_std_age)
+
+GRValues_w_a2.4 <- GRValues_w_a2.4 %>% 
+  mutate(age = 2.4) %>% 
+  rename(GR_w_each_age = GrowthRate_at_std_age)
+
+GRValues_w_a5 <- GRValues_w_a5 %>% 
+  mutate(age = 5) %>% 
+  rename(GR_w_each_age = GrowthRate_at_std_age)
+
+GRValues_w_a7 <- GRValues_w_a7 %>% 
+  mutate(age = 7) %>% 
+  rename(GR_w_each_age = GrowthRate_at_std_age)
+
+GRValues_w_a9 <- GRValues_w_a9 %>% 
+  mutate(age = 9) %>% 
+  filter(!Spp %in% c("PILI")) #%>% 
+  #rename(GR_w_each_age = GrowthRate_at_std_age)
+
+GRValues_w_a32 <- GRValues_w_a32 %>% 
+  mutate(age = 32) %>% 
+  filter(!Spp %in% c("BOLE", "COER", "GRSP", "HEPU", "PILI")) %>% 
+  rename(GR_w_each_age = GrowthRate_at_std_age)
+
+GR_w_each_age <- GRValues_w_a1.4 %>% 
+  bind_rows(GRValues_w_a2.4) %>% 
+  bind_rows(GRValues_w_a5) %>% 
+  bind_rows(GRValues_w_a7) %>% 
+  bind_rows(GRValues_w_a9) %>% 
+  bind_rows(GRValues_w_a32) %>% 
+  as_tibble()
+
+GRValues_la_a1.4 <- GRValues_la_a1.4 %>% 
+  mutate(age = 1.4) %>% 
+  #filter(!Spp %in% c("PHPH")) %>% 
+  rename(GR_la_each_age = GrowthRate_at_std_age)
+
+GRValues_la_a2.4 <- GRValues_la_a2.4 %>% 
+  mutate(age = 2.4) %>% 
+  rename(GR_la_each_age = GrowthRate_at_std_age)
+
+GRValues_la_a5 <- GRValues_la_a5 %>% 
+  mutate(age = 5) %>% 
+  rename(GR_la_each_age = GrowthRate_at_std_age)
+
+GRValues_la_a7 <- GRValues_la_a7 %>% 
+  mutate(age = 7) %>% 
+  rename(GR_la_each_age = GrowthRate_at_std_age)
+
+GRValues_la_a9 <- GRValues_la_a9 %>% 
+  mutate(age = 9) %>% 
+  filter(!Spp %in% c("PILI")) %>% 
+  rename(GR_la_each_age = GrowthRate_at_std_age)
+
+GRValues_la_a32 <- GRValues_la_a32 %>% 
+  mutate(age = 32) %>% 
+  filter(!Spp %in% c("BOLE", "COER", "GRSP", "HEPU", "PILI")) %>% 
+  rename(GR_la_each_age = GrowthRate_at_std_age)
+
+GR_la_each_age <- GRValues_la_a1.4 %>% 
+  bind_rows(GRValues_la_a2.4) %>% 
+  bind_rows(GRValues_la_a5) %>% 
+  bind_rows(GRValues_la_a7) %>% 
+  bind_rows(GRValues_la_a9) %>% 
+  bind_rows(GRValues_la_a32) %>% 
+  as_tibble()
+
