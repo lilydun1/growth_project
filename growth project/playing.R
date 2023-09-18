@@ -43,11 +43,7 @@ growth_data <- all_data_growth %>%
                                 "breakpoint", "breakpoint_se", "GrowthRate_at")))) %>% 
   group_by(species) %>%   
   mutate(GR_d_max = max(GR_d_each_age), GR_h_max = max(GR_h_each_age), 
-         GR_w_max = max(GR_w_each_age), GR_la_max = max(GR_la_each_age), 
-         GR_d = case_when(species == "PHPH" ~ GR_d_max), 
-         GR_h = case_when(species == "PHPH" ~ GR_h_max), 
-         GR_w = case_when(species == "PHPH" ~ GR_w_max), 
-         GR_la = case_when(species == "PHPH" ~ GR_la_max)) %>% 
+         GR_w_max = max(GR_w_each_age), GR_la_max = max(GR_la_each_age)) %>% 
   ungroup()
   
 

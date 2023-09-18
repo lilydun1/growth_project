@@ -3,13 +3,66 @@ GR_types_all = c("growth_stem_diameter", "GR_d","GR_d_age", "GR_d_50", "GR_d_25"
                  "growth_height", "GR_h","GR_h_age", "GR_h_50", "GR_h_25", "GR_h_75",
                  "growth_inv", "GR_w", "GR_w_age", "GR_w_50", "GR_w_25", "GR_w_75", 
                  "growth_leaf_area", "GR_la", "GR_la_age", "GR_la_50", "GR_la_25", "GR_la_75")
-GR_types_all = c("growth_stem_diameter", "growth_height", "growth_inv","growth_leaf_area", 
-                 "GR_d_max", "GR_h_max", "GR_w_max", "GR_la_max")
-traits_Dgrowth_plots <- map(GR_types_all, ~plotting_Dgrowth(response = "LM_SM_slope_s_a", GR = .x))
+GR_types_all = c("growth_stem_diameter", "growth_height", "growth_inv", "growth_leaf_area", 
+                 "GR_d_each_age", "GR_h_each_age", "GR_w_each_age", "GR_la_each_age")
+traits_Dgrowth_plots <- map(GR_types_all, ~plotting_Dgrowth(response = "LM_SM_slope_s", GR = .x))
 ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow=2, ncol = 4)
 
+GR_types = c("GR_d_max")
+traits_Dgrowth_plots <- map(GR_types, ~plotting_Dgrowth(response = .x, GR = "GR_w_max"))
+c3 <- ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow=1, ncol = 3)
+
+c2 <- ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow=1, ncol = 3)
+
+c1 <- ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow=1)
+
+ggarrange(c1, c2, c3, nrow = 3)
+
+d3 <- ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow=1)
+
+d2 <- ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow=1)
+
+d1 <- ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow=1)
+
+ggarrange(d1, d2, d3, nrow = 3)
+
+GR_against = c("growth_inv", "growth_leaf_area", "growth_height")
+traits_Dgrowth_plots <- map(GR_against, ~plotting_Dgrowth(response = "age", GR = .x))
+ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE)
+
+growth_data %>%
+  ggplot(aes(log10(GR_d_max), log10(growth_inv))) + 
+  geom_point() +
+  geom_smooth(method ="lm", se = FALSE) +
+  stat_poly_eq(use_label(c("eq", "R2", "P")),
+               formula = formula1)
+
+df <- growth_data %>% 
+  filter(growth_leaf_area > -0.000001) %>% 
+  group_by(Species_name, age) %>% 
+  summarise(mean = mean(wood_density)) %>% 
+  ungroup() %>% 
+  group_by(age) %>% 
+  mutate(min = Species_name[which.max(mean)])
+
+df <- growth_data %>% 
+  filter(growth_inv > -0.000001) %>% 
+  group_by(Species_name, age) %>% 
+  summarise(mean =mean(growth_inv))%>% 
+  ungroup() %>% 
+  group_by(age) %>% 
+ arrange(desc(mean))
+
+df <- growth_data %>% 
+  filter(growth_leaf_area > -0.000001) %>% 
+  group_by(Species_name, age) %>% 
+  summarise(mean = mean(growth_leaf_area)) %>% 
+  ungroup() %>% 
+  group_by(age) %>% 
+  mutate(max = Species_name[which.max(mean)])
+
 growth_data %>% 
-  ggplot(aes(log10(growth_leaf_area),log10(growth_stem_diameter))) + 
+  ggplot(aes(log10(GR_h_max),log10(GR_d_max))) + 
   geom_point() +
   geom_smooth(method ="lm") +
   stat_poly_eq(use_label(c("eq", "R2", "P")),
@@ -21,6 +74,12 @@ growth_data %>%
   geom_smooth(method ="lm") +
   stat_poly_eq(use_label(c("eq", "R2", "P")),
                formula = formula1)
+
+ggpairs(growth_data, 
+        columns=, c("growth_stem_diameter", "growth_height", "growth_inv","growth_leaf_area"),
+        axisLabels='none',  
+        upper=list(continuous='blank')
+)
 
 df <- growth_data %>% 
   group_by(species) %>%   
@@ -102,4 +161,5 @@ lma_g <- growth_data %>%
 d_mod <- lm(pct_change ~ age, df)
 
 
+  
   
