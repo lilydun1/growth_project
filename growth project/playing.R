@@ -2,9 +2,6 @@ pacman::p_load(tidyverse,ggeffects, ggpmisc, ggpubr)
 species_meta <- read_csv("data/species.csv")
 all_data_growth <- read_csv("SummaryInd.csv")
 
-all_data_growth %>% 
-  ggplot(aes(species, age)) + geom_point()
-
 growth_data <- all_data_growth %>%  
   mutate(relative_growth_diameter = growth_stem_diameter/diameter_0,
             relative_growth_height = growth_height/height_0, 
@@ -24,10 +21,24 @@ growth_data <- all_data_growth %>%
               species == "BAER" & age < 9.1 ~ "Y",
               species == "PEPU" ~ "Y", 
               species == "PELA" & age < 9.1 ~ "Y", 
-              .default = "N")) %>% 
+              .default = "N"), 
+              RA_group = as.character(round(RA_max_1, 1))) %>% 
+  group_by(species, age) %>% 
+  mutate(mean_ratio_leaf_stem = mean(ratio_leaf_stem, na.rm = TRUE),
+         mean_g_stem_diameter = mean(growth_stem_diameter, na.rm = TRUE),
+         mean_g_height = mean(growth_height, na.rm = TRUE),
+         mean_g_inv = mean(growth_inv, na.rm = TRUE), 
+         mean_g_leaf_area = mean(growth_leaf_area, na.rm = TRUE),
+         mean_g_gross_inv = mean(gross_inv, na.rm = TRUE),
+         median_g_stem_diameter = median(growth_stem_diameter),
+         median_g_height = median(growth_height),
+         median_g_inv = median(growth_inv), 
+         median_g_leaf_area = median(growth_leaf_area), 
+         median_g_gross_inv = median(gross_inv),) %>% 
   inner_join(LM_SM_allometric_trait_s_a, by = c("age" = "age", "species" = "species")) %>% 
   inner_join(LM_SM_allometric_trait_s, by = c("species" = "species")) %>% 
   inner_join(LA_SM_allometric_trait_s, by = c("species" = "species")) %>% 
+  inner_join(LA_SM_allometric_trait_s_a, by = c("age" = "age", "species" = "species")) %>% 
   inner_join(species_meta, by = c("species" = "Abbreviation")) %>% 
   inner_join(GR_d, by = c("species" = "Spp")) %>% 
   inner_join(GR_h, by = c("species" = "Spp")) %>% 
@@ -38,9 +49,10 @@ growth_data <- all_data_growth %>%
   inner_join(GR_w_each_age, by = c("species" = "Spp", "age" = "age")) %>% 
   inner_join(GR_la_each_age, by = c("species" = "Spp", "age" = "age")) %>%
   dplyr::select(-c("Family", "Common_name", "Previous_names", 
-                   starts_with(c("m", "n", "slope_after_inflection", 
+                   starts_with(c("m.", "n.", "slope_after_inflection", 
                                 "slope_before_inflection", 
-                                "breakpoint", "breakpoint_se", "GrowthRate_at")))) %>% 
+                               "breakpoint", "breakpoint_se", "GrowthRate_at")))) %>% 
+  ungroup() %>% 
   group_by(species) %>%   
   mutate(GR_d_max = max(GR_d_each_age), GR_h_max = max(GR_h_each_age), 
          GR_w_max = max(GR_w_each_age), GR_la_max = max(GR_la_each_age)) %>% 
@@ -71,6 +83,14 @@ LA_SM_allometric_trait_s <- all_data_growth %>%
          LA_SM_slope_s = mod_lin$coefficients[2]) %>% 
   dplyr::select(-mod_lin)
 
+LA_SM_allometric_trait_s_a <- all_data_growth %>%
+  ungroup() %>% 
+  group_by(species, age) %>% 
+  do(mod_lin = lm(log10(leaf_area)~log10(stem_weight), data = .)) %>% 
+  mutate(LA_SM_intercept_s_a = mod_lin$coefficients[1],
+         LA_SM_slope_s_a = mod_lin$coefficients[2]) %>% 
+  dplyr::select(-mod_lin)
+
 traits_1 = c("LMA", "leaf_size", "wood_density")
 traits_2 = c("total_leaf_area", "leaf_weight", "stem_weight")
 traits_3 = c("ratio_leaf_stem", "LM_SM_slope_s_a", 
@@ -80,7 +100,7 @@ GR_types_abs = c("growth_stem_diameter", "growth_height", "growth_inv","growth_l
 
 formula1 <- y~x
 
-growth_data$age <- as.character(growth_data$age)
+growth_data$age <- factor(growth_data$age, levels = c("1.4", "2.4", "5", "7", "9", "32"))
 
 # plotting traits and diameter growth
 plotting_Dgrowth <- function(data = growth_data, GR, response) {
@@ -88,8 +108,11 @@ plotting_Dgrowth <- function(data = growth_data, GR, response) {
     geom_point() + 
     geom_smooth(method = "lm") +
     stat_poly_eq(use_label(c("eq", "R2", "P")),
-                 formula = formula1, size = 5) +
-    theme(text = element_text(size = 15))
+                 formula = formula1, size = 4, 
+                 label.y = "top", label.x = "left") +
+    stat_cor(label.y.npc="bottom", label.x.npc = "middle") +
+    theme(text = element_text(size = 15)) +
+    geom_abline(intercept = 0, slope = 1) 
 }
 
 traits_Dgrowth_plots <- map(GR_types_abs, ~plotting_Dgrowth(response = "LMA", GR = .x))
