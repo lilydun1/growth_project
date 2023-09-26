@@ -8,13 +8,13 @@ GR_types_all = c("growth_stem_diameter", "growth_height", "growth_inv", "growth_
 GR_types_all = c("growth_stem_diameter", "growth_height", "growth_inv", "growth_leaf_area", 
                  "GR_d_each_age", "GR_h_each_age", "GR_w_each_age", "GR_la_each_age")
 traits_Dgrowth_plots <- map(GR_types_all, ~plotting_Dgrowth(data = (growth_data %>% filter(age < 2.5)),
-                                                            response = "LMA", GR = .x))
+                                                            response = "mean_ratio_leaf_stem", GR = .x))
 df <- ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow=2, ncol = 5)
 annotate_figure(df, "growth at 1.4 and 2.4 ages")
 
-GR_types = c("growth_stem_diameter", "growth_inv", "growth_leaf_area", "gross_inv")
+GR_types = c("mean_g_stem_diameter")
 traits_Dgrowth_plots <- map(GR_types, ~plotting_Dgrowth(data = (growth_data %>% filter(age < 2.5)),
-                                                                  response = .x, GR = "growth_height"))
+                                                                  response = .x, GR = "mean_g_inv"))
 c4 <- ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow=1, ncol = 4)
 
 c3 <- ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow=1, ncol = 4)
@@ -24,7 +24,7 @@ c2 <- ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow=1, n
 c1 <- ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow=1)
 
 c <- ggarrange(c1, c2, c3, c4, nrow = 4)
-annotate_figure(c, "mean growth at 1.4 and 2.4 ages")
+annotate_figure(c, "mean GRs at 1.4 and 2.4 ages")
 
 traits <- c("wood_density")
 traits_Dgrowth_plots <- map(traits, ~plotting_Dgrowth(data = (growth_data %>% filter(age < 2.5)),
@@ -44,12 +44,16 @@ model <- aov(growth_stem_diameter~Species_name, data=growth_data)
 summary(model)
 TukeyHSD(model, conf.level=.95)
 
-GR_against = c("mean_g_stem_diameter", "mean_g_height", "mean_g_inv", "mean_g_leaf_area")
-traits_Dgrowth_plots <- map(GR_against, ~plotting_Dgrowth(data = (growth_data %>% group_by(species, age) %>%  mutate(mean_ratio_leaf_stem = mean(ratio_leaf_stem))), 
-                                                          response = "LM_SM_slope_s_a", GR = .x))
-ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow = 1, ncol = 4)
-
-
+mod <- lm(log10(mean_g_stem_diameter)~log10(LMA)+log10(wood_density)+log10(mean_ratio_leaf_stem), 
+          data = (growth_data %>% filter(age < 2.5)))
+mod <- lm(log10(mean_g_height)~log10(LMA)+log10(wood_density)+log10(mean_ratio_leaf_stem), 
+          data = (growth_data %>% filter(age < 2.5)))
+mod <- lm(log10(mean_g_inv)~log10(LMA)+log10(wood_density)+log10(mean_ratio_leaf_stem), 
+          data = (growth_data %>% filter(age < 2.5)))
+mod <- lm(log10(mean_g_gross_inv)~log10(LMA)+log10(wood_density)+log10(mean_ratio_leaf_stem), 
+          data = (growth_data %>% filter(age < 2.5)))
+summary(mod)
+check_model(mod)
 
 growth_data %>%
   ggplot(aes(log10(LMA), log10(mean_g_stem_diameter), col = age)) + 

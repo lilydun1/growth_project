@@ -110,9 +110,9 @@ plotting_Dgrowth <- function(data = growth_data, GR, response) {
     stat_poly_eq(use_label(c("eq", "R2", "P")),
                  formula = formula1, size = 4, 
                  label.y = "top", label.x = "left") +
-    stat_cor(label.y.npc="bottom", label.x.npc = "middle") +
-    theme(text = element_text(size = 15)) +
-    geom_abline(intercept = 0, slope = 1) 
+    #stat_cor(label.y.npc="bottom", label.x.npc = "middle") +
+    theme(text = element_text(size = 15)) #+
+    #geom_abline(intercept = 0, slope = 1) 
 }
 
 traits_Dgrowth_plots <- map(GR_types_abs, ~plotting_Dgrowth(response = "LMA", GR = .x))
