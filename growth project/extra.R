@@ -5,53 +5,111 @@ GR_types_all = c("growth_stem_diameter", "GR_d","GR_d_age", "GR_d_50", "GR_d_25"
                  "growth_leaf_area", "GR_la", "GR_la_age", "GR_la_50", "GR_la_25", "GR_la_75")
 GR_types_all = c("growth_stem_diameter", "growth_height", "growth_inv", "growth_leaf_area", "gross_inv",
                  "mean_g_stem_diameter", "mean_g_height", "mean_g_inv", "mean_g_leaf_area", "mean_g_gross_inv")
-GR_types_all = c("growth_stem_diameter", "growth_height", "growth_inv", "growth_leaf_area", 
-                 "GR_d_each_age", "GR_h_each_age", "GR_w_each_age", "GR_la_each_age")
-traits_Dgrowth_plots <- map(GR_types_all, ~plotting_Dgrowth(data = (growth_data %>% filter(age < 2.5)),
-                                                            response = "mean_ratio_leaf_stem", GR = .x))
-df <- ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow=2, ncol = 5)
-annotate_figure(df, "growth at 1.4 and 2.4 ages")
+GR_types_all = c("mean_g_stem_diameter", "mean_g_height", "mean_g_inv", "mean_g_leaf_area", "mean_g_gross_inv")
+traits_Dgrowth_plots <- map(GR_types_all, ~plotting_Dgrowth(data = (growth_data %>% 
+                                                                      distinct(mean_ratio_leaf_stem, .keep_all = TRUE)),
+                                                            response = "wood_density", GR = .x))
+ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE)
 
-GR_types = c("mean_g_stem_diameter")
-traits_Dgrowth_plots <- map(GR_types, ~plotting_Dgrowth(data = (growth_data %>% filter(age < 2.5)),
+ggarrange(nonmean, mean, nrow = 2)
+
+df <- growth_data %>% mutate(q = replace(growth_leaf_area, which(growth_leaf_area < -0.00001), NA)) %>%  group_by(species, age) %>% 
+  mutate(q = mean(q, na.rm = TRUE)) %>% select(q)
+
+GR_types = c("mean_g_height")
+traits_Dgrowth_plots <- map(GR_types, ~plotting_Dgrowth(data = (growth_data %>% 
+                                                                  distinct(mean_ratio_leaf_stem, .keep_all = TRUE)),
                                                                   response = .x, GR = "mean_g_inv"))
-c4 <- ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow=1, ncol = 4)
+c4 <- ggarrange(plotlist = traits_Dgrowth_plots,legend = "none", nrow=1, ncol = 4)
 
-c3 <- ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow=1, ncol = 4)
+c3 <- ggarrange(plotlist = traits_Dgrowth_plots, legend = "none", nrow=1, ncol = 4)
 
-c2 <- ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow=1, ncol = 4)
+c2 <- ggarrange(plotlist = traits_Dgrowth_plots, legend = "none", nrow=1, ncol = 4)
 
 c1 <- ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow=1)
 
 c <- ggarrange(c1, c2, c3, c4, nrow = 4)
 annotate_figure(c, "mean GRs at 1.4 and 2.4 ages")
 
-traits <- c("wood_density")
-traits_Dgrowth_plots <- map(traits, ~plotting_Dgrowth(data = (growth_data %>% filter(age < 2.5)),
-                                                        response = .x, GR = "mean_ratio_leaf_stem"))
-d4 <- ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow=1, ncol = 4)
+traits <- c("wood_density", "mean_ratio_leaf_stem_s")
+traits_Dgrowth_plots <- map(traits, ~plotting_Dgrowth(data = (growth_data %>% 
+                                                                distinct(mean_ratio_leaf_stem_s, .keep_all = TRUE)),
+                                                        response = .x, GR = "mean_LMA_s"))
+d4 <- ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow=1, ncol = 3)
 
-d3 <- ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow=1, ncol = 4)
+d3 <- ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow=1, ncol = 3)
 
-d2 <- ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow=1, ncol = 4)
+d2 <- ggarrange(plotlist = traits_Dgrowth_plots, legend = "none", nrow=1, ncol = 2)
 
 d1 <- ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE, nrow=1)
 
-d <- ggarrange(d1, d2, d3, d4, nrow = 4)
-annotate_figure(d, "traits correlated 1.4 and 2.4 ages")
+d <- ggarrange(d1, d2, nrow = 2)
 
 model <- aov(growth_stem_diameter~Species_name, data=growth_data)
 summary(model)
 TukeyHSD(model, conf.level=.95)
 
-mod <- lm(log10(mean_g_stem_diameter)~log10(LMA)+log10(wood_density)+log10(mean_ratio_leaf_stem), 
-          data = (growth_data %>% filter(age < 2.5)))
-mod <- lm(log10(mean_g_height)~log10(LMA)+log10(wood_density)+log10(mean_ratio_leaf_stem), 
-          data = (growth_data %>% filter(age < 2.5)))
-mod <- lm(log10(mean_g_inv)~log10(LMA)+log10(wood_density)+log10(mean_ratio_leaf_stem), 
-          data = (growth_data %>% filter(age < 2.5)))
+g1 <- growth_data %>% 
+  filter(age == 32) %>% 
+  ggplot(aes(log10(GR_d_each_age), log10(mean_g_stem_diameter))) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  stat_poly_eq(use_label(c("eq", "R2", "P")),
+               formula = formula1, size = 4, 
+               label.y = "top", label.x = "left") +
+  stat_cor(label.y.npc="bottom", label.x.npc = "middle") +
+  theme(text = element_text(size = 15)) +
+  geom_abline(intercept = 0, slope = 1) 
+
+g <- growth_data %>% 
+  filter(age == 32) %>% 
+  ggplot(aes(log10(GR_h_each_age), log10(mean_g_height))) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  stat_poly_eq(use_label(c("eq", "R2", "P")),
+               formula = formula1, size = 4, 
+               label.y = "top", label.x = "left") +
+  stat_cor(label.y.npc="bottom", label.x.npc = "middle") +
+  theme(text = element_text(size = 15)) +
+  geom_abline(intercept = 0, slope = 1) 
+
+g2 <-growth_data %>% 
+  filter(age == 32) %>% 
+  ggplot(aes(log10(GR_la_each_age), log10(mean_g_leaf_area))) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  stat_poly_eq(use_label(c("eq", "R2", "P")),
+               formula = formula1, size = 4, 
+               label.y = "top", label.x = "left") +
+  stat_cor(label.y.npc="bottom", label.x.npc = "middle") +
+  theme(text = element_text(size = 15)) +
+  geom_abline(intercept = 0, slope = 1) 
+
+g3 <-growth_data %>% 
+  filter(age == 32) %>% 
+  ggplot(aes(log10(GR_w_each_age), log10(mean_g_inv))) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  stat_poly_eq(use_label(c("eq", "R2", "P")),
+               formula = formula1, size = 4, 
+               label.y = "top", label.x = "left") +
+  stat_cor(label.y.npc="bottom", label.x.npc = "middle") +
+  theme(text = element_text(size = 15)) +
+  geom_abline(intercept = 0, slope = 1) 
+
+gg <- ggarrange(g, g1, g2, g3)
+annotate_figure(gg, "curves at 32")
+
+mod <- lm(log10(mean_g_stem_diameter)~log10(LMA)+log10(wood_density)+log10(mean_ratio_leaf_stem)+
+            log10(LM_SM_slope_s_a), data = (growth_data))
+mod <- lm(log10(mean_g_height)~log10(LMA)+log10(wood_density)+log10(mean_ratio_leaf_stem)+
+            log10(LM_SM_slope_s_a), data = (growth_data %>% filter(mean_g_height > -0.01)))
+mod <- lm(log10(mean_g_leaf_area)~log10(LMA)+log10(wood_density)+log10(mean_ratio_leaf_stem)+
+            log10(LM_SM_slope_s_a), data = (growth_data %>% filter(mean_g_leaf_area > -0.01)))
+mod <- lm(log10(mean_g_inv)~log10(LMA)+log10(wood_density)+log10(mean_ratio_leaf_stem)+
+            log10(LM_SM_slope_s_a), data = (growth_data))
 mod <- lm(log10(mean_g_gross_inv)~log10(LMA)+log10(wood_density)+log10(mean_ratio_leaf_stem), 
-          data = (growth_data %>% filter(age < 2.5)))
+          data = (growth_data))
 summary(mod)
 check_model(mod)
 
@@ -187,16 +245,17 @@ f4 <- growth_data %>%
 
 growth_data$age <- factor(growth_data$age, levels = c("1.4", "2.4", "5", "7", "9", "32"))
 
-f4 %>% 
-  bind_rows(f1) %>% 
-  bind_rows(f3) %>% 
-  bind_rows(f2) %>% 
+f3 %>% 
+  # bind_rows(f1) %>% 
+  # bind_rows(f3) %>% 
+  # bind_rows(f2) %>% 
   mutate(age = factor(age, levels = c("1.4", "2.4", "5", "7", "9", "32"))) %>% 
   mutate(ranks = factor(ranks)) %>%
   #filter(Species_name == "Banksia ericifolia") %>% 
   ggplot(aes(ranks, log10(mean))) +
   geom_boxplot() +
-  facet_wrap("age")
+  facet_wrap("age") +
+  labs(y = "growth_inv")
 
 growth_data %>% 
   ggplot(aes(log10(LMA),log10(growth_stem_diameter))) + 
@@ -297,6 +356,52 @@ lma_g <- growth_data %>%
 
 d_mod <- lm(pct_change ~ age, df)
 
+growth_data %>% 
+  group_by(species) %>% 
+  mutate(mean_stem_weight = mean(stem_weight, na.rm = TRUE),
+         mean_height = mean(height, na.rm = TRUE)) %>% 
+  ggplot(aes(log(mean_stem_weight), log(mean_height))) + 
+  geom_point() + 
+  geom_smooth(method = "lm") +
+  stat_poly_eq(use_label(c("eq", "R2", "P")),
+                                          formula = formula1, size = 4, 
+                                          label.y = "top", label.x = "left")
 
-  
-  
+growth_data %>% 
+  group_by(species) %>% 
+  mutate(mean_leaf_weight = mean(leaf_weight, na.rm = TRUE),
+         mean_leaf_area = mean(leaf_area, na.rm = TRUE)) %>% 
+  ggplot(aes(log(mean_leaf_area),log(mean_leaf_weight))) + 
+  geom_point() + 
+  geom_smooth(method = "lm") +
+  stat_poly_eq(use_label(c("eq", "R2", "P")),
+               formula = formula1, size = 4, 
+               label.y = "top", label.x = "left")
+
+df <- c("1.4", "2.4", "5", "7", "9", "32")
+
+for(i in df) {
+mod <- lm(log10(mean_g_leaf_area)~log10(LMA)+log10(wood_density)+log10(mean_ratio_leaf_stem), 
+          data = (growth_data %>% 
+                    distinct(mean_ratio_leaf_stem, .keep_all = TRUE) %>% 
+                    filter(age == i))) %>% mutate(mean_g_height = mean_g_height + 45)))
+print(summary(mod))
+
+}
+
+
+mod <- lm(formula = log10(mean_g_gross_inv) ~ log10(LMA)*age +log10(wood_density)*age 
+          + log10(mean_ratio_leaf_stem)*age, 
+   data = (growth_data %>% 
+             distinct(mean_ratio_leaf_stem, .keep_all = TRUE) %>% mutate(mean_g_height = mean_g_height + 45)))
+
+GR_types_all = c("mean_g_stem_diameter", "mean_g_height", 
+                 "mean_g_inv", "mean_g_leaf_area", "mean_g_gross_inv")
+
+mod <- lm(formula = log10(mean_g_height) ~ log10(LMA) + log10(wood_density) + log10(mean_ratio_leaf_stem), data = (growth_data %>% 
+                                                                  distinct(mean_ratio_leaf_stem, .keep_all = TRUE) %>% mutate(mean_g_height = mean_g_height+0.00001)))
+summary(mod)
+
+mod <- lm(formula = log10(mean_g_stem_diameter) ~ log10(LMA) * age, data = (growth_data%>% 
+            distinct(mean_ratio_leaf_stem, .keep_all = TRUE)))
+

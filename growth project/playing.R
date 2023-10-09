@@ -26,15 +26,23 @@ growth_data <- all_data_growth %>%
   group_by(species, age) %>% 
   mutate(mean_ratio_leaf_stem = mean(ratio_leaf_stem, na.rm = TRUE),
          mean_g_stem_diameter = mean(growth_stem_diameter, na.rm = TRUE),
-         mean_g_height = mean(growth_height, na.rm = TRUE),
+         mean_g_height = mean(growth_height, na.rm = TRUE)+170,
          mean_g_inv = mean(growth_inv, na.rm = TRUE), 
-         mean_g_leaf_area = mean(growth_leaf_area, na.rm = TRUE),
+         mean_g_leaf_area = mean(growth_leaf_area, na.rm = TRUE)+70,
          mean_g_gross_inv = mean(gross_inv, na.rm = TRUE),
          median_g_stem_diameter = median(growth_stem_diameter),
          median_g_height = median(growth_height),
          median_g_inv = median(growth_inv), 
          median_g_leaf_area = median(growth_leaf_area), 
          median_g_gross_inv = median(gross_inv),) %>% 
+  ungroup() %>% 
+  group_by(species) %>% 
+  mutate(mean_ratio_leaf_stem_s = mean(ratio_leaf_stem, na.rm = TRUE),
+         mean_g_stem_diameter_s = mean(growth_stem_diameter, na.rm = TRUE),
+         mean_g_height_s = mean(growth_height, na.rm = TRUE),
+         mean_g_inv_s = mean(growth_inv, na.rm = TRUE), 
+         mean_g_leaf_area_s = mean(growth_leaf_area, na.rm = TRUE),
+         mean_g_gross_inv_s = mean(gross_inv, na.rm = TRUE)) %>% 
   inner_join(LM_SM_allometric_trait_s_a, by = c("age" = "age", "species" = "species")) %>% 
   inner_join(LM_SM_allometric_trait_s, by = c("species" = "species")) %>% 
   inner_join(LA_SM_allometric_trait_s, by = c("species" = "species")) %>% 
@@ -104,11 +112,11 @@ growth_data$age <- factor(growth_data$age, levels = c("1.4", "2.4", "5", "7", "9
 
 # plotting traits and diameter growth
 plotting_Dgrowth <- function(data = growth_data, GR, response) {
-  ggplot(data = data, aes(log10(.data[[response]]), log10(.data[[GR]]))) +
+  ggplot(data = data, aes(log10(.data[[response]]), log10(.data[[GR]]), col = age)) +
     geom_point() + 
     geom_smooth(method = "lm") +
-    stat_poly_eq(use_label(c("eq", "R2", "P")),
-                 formula = formula1, size = 4, 
+    stat_poly_eq(use_label(c("eq", "R2", "P", "n")),
+                 formula = formula1, 
                  label.y = "top", label.x = "left") +
     #stat_cor(label.y.npc="bottom", label.x.npc = "middle") +
     theme(text = element_text(size = 15)) #+
