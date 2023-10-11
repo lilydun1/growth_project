@@ -3,9 +3,8 @@ species_meta <- read_csv("data/species.csv")
 all_data_growth <- read_csv("SummaryInd.csv")
 
 growth_data <- all_data_growth %>%  
-  mutate(relative_growth_diameter = growth_stem_diameter/diameter_0,
-            relative_growth_height = growth_height/height_0, 
-            ratio_leaf_stem = leaf_weight/stem_weight,
+  mutate(ratio_leaf_stem = leaf_weight_0/stem_weight_0,
+            leaf_whole = leaf_weight_0/total_weight_0, 
             age_half_reproduction = case_when(
               species == "BOLE" & age < 1.5 ~ "Y",
               species == "HATE" & age < 9.1 ~ "Y",
@@ -22,19 +21,18 @@ growth_data <- all_data_growth %>%
               species == "PEPU" ~ "Y", 
               species == "PELA" & age < 9.1 ~ "Y", 
               .default = "N"), 
-              RA_group = as.character(round(RA_max_1, 1))) %>% 
+              RA_group = as.character(round(RA_max_1, 1)), 
+            age_group = case_when(age < 2.5 ~ "young", 
+                                  age > 2.5 ~ "old")) %>% 
+  filter(growth_leaf_area > -0.0001) %>% 
   group_by(species, age) %>% 
   mutate(mean_ratio_leaf_stem = mean(ratio_leaf_stem, na.rm = TRUE),
-         mean_g_stem_diameter = mean(growth_stem_diameter, na.rm = TRUE),
-         mean_g_height = mean(growth_height, na.rm = TRUE)+170,
+         mean_leaf_whole = mean(leaf_whole, na.rm = TRUE),
+         mean_g_diameter = mean(growth_stem_diameter, na.rm = TRUE),
+         mean_g_height = mean(growth_height, na.rm = TRUE),
          mean_g_inv = mean(growth_inv, na.rm = TRUE), 
-         mean_g_leaf_area = mean(growth_leaf_area, na.rm = TRUE)+70,
-         mean_g_gross_inv = mean(gross_inv, na.rm = TRUE),
-         median_g_stem_diameter = median(growth_stem_diameter),
-         median_g_height = median(growth_height),
-         median_g_inv = median(growth_inv), 
-         median_g_leaf_area = median(growth_leaf_area), 
-         median_g_gross_inv = median(gross_inv),) %>% 
+         mean_g_leaf_area = mean(growth_leaf_area, na.rm = TRUE),
+         mean_g_gross_inv = mean(gross_inv, na.rm = TRUE)) %>% 
   ungroup() %>% 
   group_by(species) %>% 
   mutate(mean_ratio_leaf_stem_s = mean(ratio_leaf_stem, na.rm = TRUE),
@@ -42,29 +40,31 @@ growth_data <- all_data_growth %>%
          mean_g_height_s = mean(growth_height, na.rm = TRUE),
          mean_g_inv_s = mean(growth_inv, na.rm = TRUE), 
          mean_g_leaf_area_s = mean(growth_leaf_area, na.rm = TRUE),
-         mean_g_gross_inv_s = mean(gross_inv, na.rm = TRUE)) %>% 
+         mean_g_gross_inv_s = mean(gross_inv, na.rm = TRUE), 
+         mean_LMA_s = mean(LMA, na.rm = TRUE), 
+         mean_ratio_leaf_stem_s = mean(ratio_leaf_stem, na.rm = TRUE)) %>% 
   inner_join(LM_SM_allometric_trait_s_a, by = c("age" = "age", "species" = "species")) %>% 
   inner_join(LM_SM_allometric_trait_s, by = c("species" = "species")) %>% 
   inner_join(LA_SM_allometric_trait_s, by = c("species" = "species")) %>% 
   inner_join(LA_SM_allometric_trait_s_a, by = c("age" = "age", "species" = "species")) %>% 
-  inner_join(species_meta, by = c("species" = "Abbreviation")) %>% 
-  inner_join(GR_d, by = c("species" = "Spp")) %>% 
-  inner_join(GR_h, by = c("species" = "Spp")) %>% 
-  inner_join(GR_w, by = c("species" = "Spp")) %>% 
-  inner_join(GR_la, by = c("species" = "Spp")) %>%
-  inner_join(GR_d_each_age, by = c("species" = "Spp", "age" = "age")) %>% 
-  inner_join(GR_h_each_age, by = c("species" = "Spp", "age" = "age")) %>% 
-  inner_join(GR_w_each_age, by = c("species" = "Spp", "age" = "age")) %>% 
-  inner_join(GR_la_each_age, by = c("species" = "Spp", "age" = "age")) %>%
-  dplyr::select(-c("Family", "Common_name", "Previous_names", 
-                   starts_with(c("m.", "n.", "slope_after_inflection", 
-                                "slope_before_inflection", 
-                               "breakpoint", "breakpoint_se", "GrowthRate_at")))) %>% 
-  ungroup() %>% 
-  group_by(species) %>%   
-  mutate(GR_d_max = max(GR_d_each_age), GR_h_max = max(GR_h_each_age), 
-         GR_w_max = max(GR_w_each_age), GR_la_max = max(GR_la_each_age)) %>% 
-  ungroup()
+  inner_join(species_meta, by = c("species" = "Abbreviation")) #%>% 
+  # inner_join(GR_d, by = c("species" = "Spp")) %>% 
+  # inner_join(GR_h, by = c("species" = "Spp")) %>% 
+  # inner_join(GR_w, by = c("species" = "Spp")) %>% 
+  # inner_join(GR_la, by = c("species" = "Spp")) %>%
+  # inner_join(GR_d_each_age, by = c("species" = "Spp", "age" = "age")) %>% 
+  # inner_join(GR_h_each_age, by = c("species" = "Spp", "age" = "age")) %>% 
+  # inner_join(GR_w_each_age, by = c("species" = "Spp", "age" = "age")) %>% 
+  # inner_join(GR_la_each_age, by = c("species" = "Spp", "age" = "age")) %>%
+  # dplyr::select(-c("Family", "Common_name", "Previous_names", 
+  #                  starts_with(c("m.", "n.", "slope_after_inflection", 
+  #                               "slope_before_inflection", 
+  #                              "breakpoint", "breakpoint_se", "GrowthRate_at")))) %>% 
+  # ungroup() %>% 
+  # group_by(species) %>%   
+  # mutate(GR_d_max = max(GR_d_each_age), GR_h_max = max(GR_h_each_age), 
+  #        GR_w_max = max(GR_w_each_age), GR_la_max = max(GR_la_each_age)) %>% 
+  # ungroup()
   
 
 LM_SM_allometric_trait_s_a <- all_data_growth %>%
@@ -112,14 +112,14 @@ growth_data$age <- factor(growth_data$age, levels = c("1.4", "2.4", "5", "7", "9
 
 # plotting traits and diameter growth
 plotting_Dgrowth <- function(data = growth_data, GR, response) {
-  ggplot(data = data, aes(log10(.data[[response]]), log10(.data[[GR]]), col = age)) +
+  ggplot(data = data, aes(log10(.data[[response]]), log10(.data[[GR]]))) +
     geom_point() + 
     geom_smooth(method = "lm") +
     stat_poly_eq(use_label(c("eq", "R2", "P", "n")),
                  formula = formula1, 
-                 label.y = "top", label.x = "left") +
-    #stat_cor(label.y.npc="bottom", label.x.npc = "middle") +
-    theme(text = element_text(size = 15)) #+
+                 label.y = "top", label.x = "right",rr.digits = 2,  p.digits = 2) +
+    stat_cor(label.y.npc="bottom", label.x.npc = "middle") +
+    theme(text = element_text(size = 15), panel.background = element_blank(), axis.line = element_line(colour = "black")) #+
     #geom_abline(intercept = 0, slope = 1) 
 }
 
@@ -219,12 +219,14 @@ lm_sm_plot <- function(data = growth_data, x, y, colour) {
 growth_data %>%
   ungroup() %>% 
   #filter(RA_max_1 < 0.5) %>% 
-  ggplot(aes(log10(stem_weight), log10(leaf_area))) + 
+  ggplot(aes(log10(stem_weight), log10(leaf_area), col = age)) + 
   geom_point() +
   geom_abline(intercept = 0, slope = 1) +  
   geom_smooth(method = "lm") +
   stat_poly_eq(use_label(c("eq", "R2", "P"))) +
-  theme(text = element_text(size = 15)) #+
+  theme_minimal(base_size = 15) + 
+  # Add a border around each facet
+  theme(panel.border=element_rect(fill=NA, colour="grey40")) +
   facet_wrap("Species_name") #+
   #ggtitle("no 50% allocation")
 
@@ -325,5 +327,7 @@ growth_data %>%
                                       stat(..r.squared..),stat(..p.value..))),
                   parse = TRUE) +
   ggtitle("old_species")
+
+
 
 
