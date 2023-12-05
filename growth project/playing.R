@@ -1,6 +1,18 @@
-pacman::p_load(tidyverse,ggeffects, ggpmisc, ggpubr) 
+pacman::p_load(tidyverse,ggeffects, ggpmisc, ggpubr, easystats) 
 species_meta <- read_csv("data/species.csv")
 all_data_growth <- read_csv("SummaryInd.csv")
+nutrient_data_raw <- read_csv("nutrient_data.csv") %>% filter(!is.na(age)) %>% 
+  filter(tissue == "leaves") %>%  
+  group_by(species, age) %>% 
+  mutate(mean_P = mean(P,na.rm = TRUE), 
+         mean_N = mean(N, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  group_by(species, tissue) %>% 
+  mutate(mean_P_s = mean(P,na.rm = TRUE), 
+         mean_N_s = mean(N, na.rm = TRUE)) %>%
+  ungroup() %>% 
+  select(species, age, mean_P, mean_N, mean_P_s, mean_N_s) %>% 
+  distinct(mean_P,.keep_all = TRUE)
 
 growth_data <- all_data_growth %>%  
   mutate(ratio_leaf_stem = leaf_weight_0/stem_weight_0,
@@ -21,10 +33,13 @@ growth_data <- all_data_growth %>%
               species == "PEPU" ~ "Y", 
               species == "PELA" & age < 9.1 ~ "Y", 
               .default = "N"), 
-              RA_group = as.character(round(RA_max_1, 1)), 
-            age_group = case_when(age < 2.5 ~ "young", 
-                                  age > 2.5 ~ "old")) %>% 
-  filter(growth_leaf_area > -0.0001) %>% 
+              RA_group = as.character(round(RA_max_1, 1))) %>% 
+  inner_join(LM_SM_allometric_trait_s_a, by = c("age" = "age", "species" = "species")) %>% 
+  inner_join(LM_SM_allometric_trait_s, by = c("species" = "species")) %>% 
+  inner_join(LA_SM_allometric_trait_s, by = c("species" = "species")) %>% 
+  inner_join(LA_SM_allometric_trait_s_a, by = c("age" = "age", "species" = "species")) %>% 
+  inner_join(species_meta, by = c("species" = "Abbreviation")) %>% 
+  full_join(nutrient_data_raw) %>% 
   group_by(species, age) %>% 
   mutate(mean_ratio_leaf_stem = mean(ratio_leaf_stem, na.rm = TRUE),
          mean_leaf_whole = mean(leaf_whole, na.rm = TRUE),
@@ -36,6 +51,7 @@ growth_data <- all_data_growth %>%
   ungroup() %>% 
   group_by(species) %>% 
   mutate(mean_ratio_leaf_stem_s = mean(ratio_leaf_stem, na.rm = TRUE),
+         mean_leaf_whole_s = mean(leaf_whole, na.rm = TRUE),
          mean_g_stem_diameter_s = mean(growth_stem_diameter, na.rm = TRUE),
          mean_g_height_s = mean(growth_height, na.rm = TRUE),
          mean_g_inv_s = mean(growth_inv, na.rm = TRUE), 
@@ -43,11 +59,9 @@ growth_data <- all_data_growth %>%
          mean_g_gross_inv_s = mean(gross_inv, na.rm = TRUE), 
          mean_LMA_s = mean(LMA, na.rm = TRUE), 
          mean_ratio_leaf_stem_s = mean(ratio_leaf_stem, na.rm = TRUE)) %>% 
-  inner_join(LM_SM_allometric_trait_s_a, by = c("age" = "age", "species" = "species")) %>% 
-  inner_join(LM_SM_allometric_trait_s, by = c("species" = "species")) %>% 
-  inner_join(LA_SM_allometric_trait_s, by = c("species" = "species")) %>% 
-  inner_join(LA_SM_allometric_trait_s_a, by = c("age" = "age", "species" = "species")) %>% 
-  inner_join(species_meta, by = c("species" = "Abbreviation")) #%>% 
+  mutate(age_group = case_when(
+         age < 2.5 ~ "Young (1.4, 2.4 yrs)",
+         age > 2.5 ~ "Old (5, 7, 9, 32 yrs)")) #%>% 
   # inner_join(GR_d, by = c("species" = "Spp")) %>% 
   # inner_join(GR_h, by = c("species" = "Spp")) %>% 
   # inner_join(GR_w, by = c("species" = "Spp")) %>% 
@@ -99,28 +113,31 @@ LA_SM_allometric_trait_s_a <- all_data_growth %>%
          LA_SM_slope_s_a = mod_lin$coefficients[2]) %>% 
   dplyr::select(-mod_lin)
 
-traits_1 = c("LMA", "leaf_size", "wood_density")
-traits_2 = c("total_leaf_area", "leaf_weight", "stem_weight")
-traits_3 = c("ratio_leaf_stem", "LM_SM_slope_s_a", 
-             "LM_SM_slope_s", "LA_SM_slope_s")
-GR_types = c("GR_d", "GR_h", "GR_w", "GR_la")
-GR_types_abs = c("growth_stem_diameter", "growth_height", "growth_inv","growth_leaf_area")
-
 formula1 <- y~x
 
 growth_data$age <- factor(growth_data$age, levels = c("1.4", "2.4", "5", "7", "9", "32"))
 
 # plotting traits and diameter growth
-plotting_Dgrowth <- function(data = growth_data, GR, response) {
+plotting_trait_growth <- function(data = growth_data, GR, response) {
+  ggplot(data = data, aes(log10(.data[[response]]), log10(.data[[GR]]), col = age)) +
+    geom_point() + 
+    geom_smooth(method = "lm", se = FALSE) +
+    theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+          axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+          axis.text = element_text(size=12)) +
+    labs(colour = "Age (yrs)") +
+    scale_color_manual(values=c("#c35f5d", "#e5874d","#b3a034", "#12a388", "#81d0e2", "#8282b4"))
+}
+
+#for the correlations
+plotting_cors <- function(data = growth_data, GR, response) {
   ggplot(data = data, aes(log10(.data[[response]]), log10(.data[[GR]]))) +
     geom_point() + 
     geom_smooth(method = "lm") +
-    stat_poly_eq(use_label(c("eq", "R2", "P", "n")),
-                 formula = formula1, 
-                 label.y = "top", label.x = "right",rr.digits = 2,  p.digits = 2) +
-    stat_cor(label.y.npc="bottom", label.x.npc = "middle") +
-    theme(text = element_text(size = 15), panel.background = element_blank(), axis.line = element_line(colour = "black")) #+
-    #geom_abline(intercept = 0, slope = 1) 
+    stat_poly_eq(use_label(c("R2")), size = 6, hjust = -0.5) +
+  theme(text = element_text(size = 18), panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), 
+        axis.text = element_text(size=12))
 }
 
 traits_Dgrowth_plots <- map(GR_types_abs, ~plotting_Dgrowth(response = "LMA", GR = .x))
