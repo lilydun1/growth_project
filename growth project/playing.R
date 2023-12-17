@@ -1,4 +1,5 @@
 pacman::p_load(tidyverse,ggeffects, ggpmisc, ggpubr, easystats) 
+
 species_meta <- read_csv("data/species.csv")
 all_data_growth <- read_csv("SummaryInd.csv")
 nutrient_data_raw <- read_csv("nutrient_data.csv") %>% filter(!is.na(age)) %>% 
@@ -15,34 +16,19 @@ nutrient_data_raw <- read_csv("nutrient_data.csv") %>% filter(!is.na(age)) %>%
   distinct(mean_P,.keep_all = TRUE)
 
 growth_data <- all_data_growth %>%  
-  mutate(ratio_leaf_stem = leaf_weight_0/stem_weight_0,
-            leaf_whole = leaf_weight_0/total_weight_0, 
-            age_half_reproduction = case_when(
-              species == "BOLE" & age < 1.5 ~ "Y",
-              species == "HATE" & age < 9.1 ~ "Y",
-              species == "GRSP" & age < 2.5 ~ "Y",
-              species == "PILI" & age < 1.5 ~ "Y",
-              species == "HEPU" & age < 2.5 ~ "Y",
-              species == "EPMI" & age < 5.1 ~ "Y",
-              species == "GRBU" & age < 2.5 ~ "Y",
-              species == "LEES" & age < 2.5 ~ "Y",
-              species == "PUTU" & age < 2.5 ~ "Y",
-              species == "COER" & age < 5.1 ~ "Y",
-              species == "PHPH" & age < 2.5 ~ "Y",
-              species == "BAER" & age < 9.1 ~ "Y",
-              species == "PEPU" ~ "Y", 
-              species == "PELA" & age < 9.1 ~ "Y", 
-              .default = "N"), 
-              RA_group = as.character(round(RA_max_1, 1))) %>% 
-  inner_join(LM_SM_allometric_trait_s_a, by = c("age" = "age", "species" = "species")) %>% 
-  inner_join(LM_SM_allometric_trait_s, by = c("species" = "species")) %>% 
-  inner_join(LA_SM_allometric_trait_s, by = c("species" = "species")) %>% 
-  inner_join(LA_SM_allometric_trait_s_a, by = c("age" = "age", "species" = "species")) %>% 
-  inner_join(species_meta, by = c("species" = "Abbreviation")) %>% 
   full_join(nutrient_data_raw) %>% 
+  mutate(ratio_leaf_stem = leaf_weight/stem_weight,
+         leaf_m_whole = leaf_weight/total_weight, 
+         leaf_a_whole = leaf_area/total_weight, 
+         mean_P_area = mean_P*leaf_size, 
+         mean_N_area = mean_N*leaf_size,
+         age_group = case_when(
+           age < 2.5 ~ "Young (1.4, 2.4 yrs)",
+           age > 2.5 ~ "Old (5, 7, 9, 32 yrs)")) %>% 
   group_by(species, age) %>% 
   mutate(mean_ratio_leaf_stem = mean(ratio_leaf_stem, na.rm = TRUE),
-         mean_leaf_whole = mean(leaf_whole, na.rm = TRUE),
+         mean_leaf_m_whole = mean(leaf_m_whole, na.rm = TRUE),
+         mean_leaf_a_whole = mean(leaf_a_whole, na.rm = TRUE),
          mean_g_diameter = mean(growth_stem_diameter, na.rm = TRUE),
          mean_g_height = mean(growth_height, na.rm = TRUE),
          mean_g_inv = mean(growth_inv, na.rm = TRUE), 
@@ -51,7 +37,8 @@ growth_data <- all_data_growth %>%
   ungroup() %>% 
   group_by(species) %>% 
   mutate(mean_ratio_leaf_stem_s = mean(ratio_leaf_stem, na.rm = TRUE),
-         mean_leaf_whole_s = mean(leaf_whole, na.rm = TRUE),
+         mean_leaf_m_whole_s = mean(leaf_m_whole, na.rm = TRUE),
+         mean_leaf_a_whole_s = mean(leaf_a_whole, na.rm = TRUE),
          mean_g_stem_diameter_s = mean(growth_stem_diameter, na.rm = TRUE),
          mean_g_height_s = mean(growth_height, na.rm = TRUE),
          mean_g_inv_s = mean(growth_inv, na.rm = TRUE), 
@@ -59,59 +46,7 @@ growth_data <- all_data_growth %>%
          mean_g_gross_inv_s = mean(gross_inv, na.rm = TRUE), 
          mean_LMA_s = mean(LMA, na.rm = TRUE), 
          mean_ratio_leaf_stem_s = mean(ratio_leaf_stem, na.rm = TRUE)) %>% 
-  mutate(age_group = case_when(
-         age < 2.5 ~ "Young (1.4, 2.4 yrs)",
-         age > 2.5 ~ "Old (5, 7, 9, 32 yrs)")) #%>% 
-  # inner_join(GR_d, by = c("species" = "Spp")) %>% 
-  # inner_join(GR_h, by = c("species" = "Spp")) %>% 
-  # inner_join(GR_w, by = c("species" = "Spp")) %>% 
-  # inner_join(GR_la, by = c("species" = "Spp")) %>%
-  # inner_join(GR_d_each_age, by = c("species" = "Spp", "age" = "age")) %>% 
-  # inner_join(GR_h_each_age, by = c("species" = "Spp", "age" = "age")) %>% 
-  # inner_join(GR_w_each_age, by = c("species" = "Spp", "age" = "age")) %>% 
-  # inner_join(GR_la_each_age, by = c("species" = "Spp", "age" = "age")) %>%
-  # dplyr::select(-c("Family", "Common_name", "Previous_names", 
-  #                  starts_with(c("m.", "n.", "slope_after_inflection", 
-  #                               "slope_before_inflection", 
-  #                              "breakpoint", "breakpoint_se", "GrowthRate_at")))) %>% 
-  # ungroup() %>% 
-  # group_by(species) %>%   
-  # mutate(GR_d_max = max(GR_d_each_age), GR_h_max = max(GR_h_each_age), 
-  #        GR_w_max = max(GR_w_each_age), GR_la_max = max(GR_la_each_age)) %>% 
-  # ungroup()
-  
-
-LM_SM_allometric_trait_s_a <- all_data_growth %>%
-  ungroup() %>% 
-  group_by(species, age) %>% 
-  do(mod_lin = lm(log10(leaf_weight)~log10(stem_weight), data = .)) %>% 
-  mutate(LM_SM_intercept_s_a = mod_lin$coefficients[1],
-         LM_SM_slope_s_a = mod_lin$coefficients[2]) %>% 
-  dplyr::select(-mod_lin)
-
-LM_SM_allometric_trait_s <- all_data_growth %>%
-  ungroup() %>% 
-  group_by(species) %>% 
-  do(mod_lin = lm(log10(leaf_weight)~log10(stem_weight), data = .)) %>% 
-  mutate(LM_SM_intercept_s = mod_lin$coefficients[1],
-         LM_SM_slope_s = mod_lin$coefficients[2]) %>% 
-  dplyr::select(-mod_lin)
-
-LA_SM_allometric_trait_s <- all_data_growth %>%
-  ungroup() %>% 
-  group_by(species) %>% 
-  do(mod_lin = lm(log10(leaf_area)~log10(stem_weight), data = .)) %>% 
-  mutate(LA_SM_intercept_s = mod_lin$coefficients[1],
-         LA_SM_slope_s = mod_lin$coefficients[2]) %>% 
-  dplyr::select(-mod_lin)
-
-LA_SM_allometric_trait_s_a <- all_data_growth %>%
-  ungroup() %>% 
-  group_by(species, age) %>% 
-  do(mod_lin = lm(log10(leaf_area)~log10(stem_weight), data = .)) %>% 
-  mutate(LA_SM_intercept_s_a = mod_lin$coefficients[1],
-         LA_SM_slope_s_a = mod_lin$coefficients[2]) %>% 
-  dplyr::select(-mod_lin)
+  ungroup()
 
 formula1 <- y~x
 
