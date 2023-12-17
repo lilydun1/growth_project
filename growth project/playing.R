@@ -68,7 +68,7 @@ plotting_trait_growth <- function(data = growth_data, GR, response) {
 plotting_cors <- function(data = growth_data, GR, response) {
   ggplot(data = data, aes(log10(.data[[response]]), log10(.data[[GR]]))) +
     geom_point() + 
-    geom_smooth(method = "lm") +
+    #geom_smooth(method = "lm") +
     stat_poly_eq(use_label(c("R2")), size = 6, hjust = -0.5) +
   theme(text = element_text(size = 18), panel.background = element_blank(), 
         axis.line = element_line(colour = "black"), 
