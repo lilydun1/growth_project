@@ -56,39 +56,96 @@ traits_growth_plots_lm_total <- map(GR_types_all, ~plotting_trait_growth(data = 
                                                                                 mutate(mean_g_gross_inv = (mean_g_gross_inv*0.001), 
                                                                                        mean_g_inv = (mean_g_inv*0.001))),
                                                                       response = "mean_leaf_m_whole", GR = .x))
+traits_growth_plots_lm_total[[1]] <- traits_growth_plots_lm_total[[1]] + ylab(bquote(Diameter~growth~(mm/yr))) + xlab(bquote(Leaf/total~mass~(mg/mg^-1))) +
+  theme(axis.title.x = element_text(colour="white"))+ 
+  scale_x_continuous(breaks = c(-1.2, -0.9, -0.6, -0.3), label = c(0.06, 0.13, 0.25, 0.5)) +
+  scale_y_continuous(breaks = c(-0.5, 0, 0.5), label = c(0.31, 1, 3.1))
+traits_growth_plots_lm_total[[2]] <- traits_growth_plots_lm_total[[2]] + ylab(bquote(Height~growth~(mm/yr)))+ xlab(bquote(Leaf/total~mass~(mg/mg^-1))) +
+  theme(axis.title.x = element_text(colour="white")) +
+  scale_x_continuous(breaks = c(-1.2, -0.9, -0.6, -0.3), label = c(0.06, 0.13, 0.25, 0.5)) +
+  scale_y_continuous(breaks = c(1, 1.5, 2, 2.5),label = c(10, 31, 100, 316))
+traits_growth_plots_lm_total[[3]] <- traits_growth_plots_lm_total[[3]] + ylab(bquote(Leaf~area~growth~(mm^2/yr))) + xlab(bquote(Leaf/total~mass~(mg/mg^-1))) +
+  scale_x_continuous(breaks = c(-1.2, -0.9, -0.6, -0.3), label = c(0.06, 0.13, 0.25, 0.5)) +
+  scale_y_continuous(breaks = c(-1, 0, 1, 2, 3),label = c(0.1, 1, 10, 100, 1000))
+traits_growth_plots_lm_total[[4]] <- traits_growth_plots_lm_total[[4]] + ylab(bquote(Aboveground~growth~(g/yr))) + xlab(bquote(Leaf/total~mass~(mg/mg^-1))) +
+  scale_x_continuous(breaks = c(-1.2, -0.9, -0.6, -0.3), label = c(0.06, 0.13, 0.25, 0.5)) +
+  scale_y_continuous(breaks = c(-1, 0, 1, 2), label = c(0.1, 1, 10, 100))
+traits_growth_plots_lm_total[[5]] <- traits_growth_plots_lm_total[[5]] + ylab(bquote(Gross~investment~growth~(g/yr))) + xlab(bquote(Leaf/total~mass~(mg/mg^-1))) +
+  scale_x_continuous(breaks = c(-1.2, -0.9, -0.6, -0.3), label = c(0.06, 0.13, 0.25, 0.5)) +
+  scale_y_continuous(breaks = c(0, 1, 2), label = c(1, 10, 100))
 leaf_m_total <- ggarrange(plotlist = traits_growth_plots_lm_total, common.legend = TRUE, labels = c("a", "b", "c", "d", "e"), vjust = 1, hjust = -3, 
                          font.label = list(size = 18), ncol = 3, nrow = 2, align = c("v"))
 ggsave("leaf_m_total.jpeg", width = 30.1, height = 21.12, units = "cm")
 
+#Mean leaf P area against all GRs
+traits_growth_plots_P <- map(GR_types_all, ~plotting_trait_growth(data = (growth_data %>%  distinct(mean_ratio_leaf_stem, .keep_all = TRUE) %>% 
+                                                                                   mutate(mean_g_gross_inv = (mean_g_gross_inv*0.001), 
+                                                                                          mean_g_inv = (mean_g_inv*0.001))),
+                                                                         response = "mean_P_area", GR = .x))
+traits_growth_plots_P[[1]] <- traits_growth_plots_P[[1]] + ylab(bquote(Diameter~growth~(mm/yr))) + xlab(bquote(Leaf~P[area]~(units))) +
+  theme(axis.title.x = element_text(colour="white"))+ 
+  scale_x_continuous(breaks = c(1, 1.5, 2, 2.5, 3), label = c(10,31.6, 100, 316.2, 1000)) +
+  scale_y_continuous(breaks = c(-0.5, 0, 0.5), label = c(0.31, 1, 3.1))
+traits_growth_plots_P[[2]] <- traits_growth_plots_P[[2]] + ylab(bquote(Height~growth~(mm/yr)))+ xlab(bquote(Leaf~P[area]~(units))) +
+  theme(axis.title.x = element_text(colour="white")) +
+  scale_x_continuous(breaks = c(1, 1.5, 2, 2.5, 3), label = c(10,31.6, 100, 316.2, 1000)) +
+  scale_y_continuous(breaks = c(1, 1.5, 2, 2.5),label = c(10, 31, 100, 316))
+traits_growth_plots_P[[3]] <- traits_growth_plots_P[[3]] + ylab(bquote(Leaf~area~growth~(mm^2/yr))) + xlab(bquote(Leaf~P[area]~(units))) +
+  scale_x_continuous(breaks = c(1, 1.5, 2, 2.5, 3), label = c(10,31.6, 100, 316.2, 1000)) +
+  scale_y_continuous(breaks = c(-1, 0, 1, 2, 3),label = c(0.1, 1, 10, 100, 1000))
+traits_growth_plots_P[[4]] <- traits_growth_plots_P[[4]] + ylab(bquote(Aboveground~growth~(g/yr))) + xlab(bquote(Leaf~P[area]~(units))) +
+  scale_x_continuous(breaks = c(1, 1.5, 2, 2.5, 3), label = c(10,31.6, 100, 316.2, 1000)) +
+  scale_y_continuous(breaks = c(-1, 0, 1, 2), label = c(0.1, 1, 10, 100))
+traits_growth_plots_P[[5]] <- traits_growth_plots_P[[5]] + ylab(bquote(Gross~investment~growth~(g/yr))) + xlab(bquote(Leaf~P[area]~(units))) +
+  scale_x_continuous(breaks = c(1, 1.5, 2, 2.5, 3), label = c(10,31.6, 100, 316.2, 1000)) +
+  scale_y_continuous(breaks = c(0, 1, 2), label = c(1, 10, 100))
+P_area_plots <- ggarrange(plotlist = traits_growth_plots_P, common.legend = TRUE, labels = c("a", "b", "c", "d", "e"), vjust = 1, hjust = -3, 
+                          font.label = list(size = 18), ncol = 3, nrow = 2, align = c("v"))
+ggsave("P_area_plots.jpeg", width = 30.1, height = 21.12, units = "cm")
 
-#Figure 3: The correlations of the traits at species level traits = c("wood_density", "mean_LMA_s", "mean_ratio_leaf_stem_s")
+#Mean leaf N area against all GRs
+traits_growth_plots_N <- map(GR_types_all, ~plotting_trait_growth(data = (growth_data %>%  distinct(mean_ratio_leaf_stem, .keep_all = TRUE) %>% 
+                                                                            mutate(mean_g_gross_inv = (mean_g_gross_inv*0.001), 
+                                                                                   mean_g_inv = (mean_g_inv*0.001))),
+                                                                  response = "mean_N_area", GR = .x))
+traits_growth_plots_N[[1]] <- traits_growth_plots_N[[1]] + ylab(bquote(Diameter~growth~(mm/yr))) + xlab(bquote(Leaf~N[area]~(units))) +
+  theme(axis.title.x = element_text(colour="white"))+ 
+  scale_x_continuous(breaks = c(-1, -0.5, 0, 0.5), label = c(0.1, 0.32, 1, 3.16)) +
+  scale_y_continuous(breaks = c(-0.5, 0, 0.5), label = c(0.31, 1, 3.1))
+traits_growth_plots_N[[2]] <- traits_growth_plots_N[[2]] + ylab(bquote(Height~growth~(mm/yr)))+ xlab(bquote(Leaf~N[area]~(units))) +
+  theme(axis.title.x = element_text(colour="white")) +
+  scale_x_continuous(breaks = c(-1, -0.5, 0, 0.5), label = c(0.1, 0.32, 1, 3.16)) +
+  scale_y_continuous(breaks = c(1, 1.5, 2, 2.5),label = c(10, 31, 100, 316))
+traits_growth_plots_N[[3]] <- traits_growth_plots_N[[3]] + ylab(bquote(Leaf~area~growth~(mm^2/yr))) + xlab(bquote(Leaf~N[area]~(units))) +
+  scale_x_continuous(breaks = c(-1, -0.5, 0, 0.5), label = c(0.1, 0.32, 1, 3.16)) +
+  scale_y_continuous(breaks = c(-1, 0, 1, 2, 3),label = c(0.1, 1, 10, 100, 1000))
+traits_growth_plots_N[[4]] <- traits_growth_plots_N[[4]] + ylab(bquote(Aboveground~growth~(g/yr))) + xlab(bquote(Leaf~N[area]~(units))) +
+  scale_x_continuous(breaks = c(-1, -0.5, 0, 0.5), label = c(0.1, 0.32, 1, 3.16)) +
+  scale_y_continuous(breaks = c(-1, 0, 1, 2), label = c(0.1, 1, 10, 100))
+traits_growth_plots_N[[5]] <- traits_growth_plots_N[[5]] + ylab(bquote(Gross~investment~growth~(g/yr))) + xlab(bquote(Leaf~N[area]~(units))) +
+  scale_x_continuous(breaks = c(-1, -0.5, 0, 0.5), label = c(0.1, 0.32, 1, 3.16)) +
+  scale_y_continuous(breaks = c(0, 1, 2), label = c(1, 10, 100))
+N_area_plots <- ggarrange(plotlist = traits_growth_plots_N, common.legend = TRUE, labels = c("a", "b", "c", "d", "e"), vjust = 1, hjust = -3, 
+                          font.label = list(size = 18), ncol = 3, nrow = 2, align = c("v"))
+ggsave("N_area_plots.jpeg", width = 30.1, height = 21.12, units = "cm")
+
+#Figure 3: The correlations of the traits at species level traits = c("wood_density", "mean_LMA_s", "mean_leaf_m_whole_s", "mean_N_area_s", "mean_P_area_s")
 #mean_LMA_s*10 is to get the units to kg/m^2 instead of g/cm^2
-traits <- c("mean_LMA_s")
+traits <- c("wood_density")
 traits_cor <- map(traits, ~plotting_cors(data = (growth_data %>% 
                                                                 distinct(mean_ratio_leaf_stem_s, .keep_all = TRUE) %>% 
                                                                 mutate(mean_LMA_s = (mean_LMA_s*10))),
-                                                      response = .x, GR = "mean_ratio_leaf_stem_s"))
-traits_cor[[1]] <- traits_cor[[1]] + 
-                              xlab(bquote(Leaf~mass~area~(kg/m^2))) + ylab(bquote(Wood~density~(g/cm^3))) +
-                              scale_x_continuous(breaks = c(-1.1, -0.9, -0.7, -0.5, -0.3), label = c(0.08, 0.13, 0.2, 0.32, 0.5)) +
-                              scale_y_continuous(breaks = c(-0.3, -0.2, -0.1, 0), label = c(0.5, 0.63, 0.79, 1))
-traits_cor[[2]] <- traits_cor[[2]] + 
-                              xlab(bquote(Leaf:stem~mass~(mg/mg^-1))) + ylab(bquote(Wood~density~(g/cm^3))) +
-                              scale_x_continuous(breaks = c(0.5, 1), label = c(3.2, 10)) +
-                              scale_y_continuous(breaks = c(-0.25, -0.2, -0.15, -0.1, -0.05), label = c(0.56, 0.63, 0.71, 0.79, 0.89))
+                                                      response = .x, GR = "mean_LMA_s"))
+P_others <- ggarrange(plotlist = traits_cor, legend = "none", nrow=1, ncol = 4, labels = c("a", "b", "c", "d"))
 
-traits_cor[[1]] <- traits_cor[[1]] + 
-                              xlab(bquote(Leaf~mass~area~(kg/m^2))) + ylab(bquote(Leaf:stem~mass~(mg/mg^-1))) +
-                              scale_x_continuous(breaks = c(-1.1, -0.9, -0.7, -0.5, -0.3), label = c(0.08, 0.13, 0.2, 0.32, 0.5)) +
-                              scale_y_continuous(breaks = c(0, 0.5, 1), label = c(1, 3.2, 10))
+N_others <- ggarrange(plotlist = traits_cor, legend = "none", nrow=1, ncol = 4, labels = c("e", "f", "g"))
 
-WD_others <- ggarrange(plotlist = traits_cor, legend = "none", nrow=1, ncol = 2, labels = c("a", "b"), vjust = 1, hjust = -3, font.label = list(size = 18))
+leaf_whole_others <- ggarrange(plotlist = traits_cor, legend = "none", nrow=1, ncol = 4, labels = c("h", "i"))
 
-ratio_LMA <- ggarrange(plotlist = traits_cor, legend = "none", labels = c("c"), vjust = 1, hjust = -3, font.label = list(size = 18),
-                nrow=1, ncol = 2) 
+LMA_others <- ggarrange(plotlist = traits_cor, legend = "none", nrow=1, ncol = 4, labels = c("k"))
 
-all_trait_cors <- ggarrange(WD_others, ratio_LMA, nrow = 2)
-ggsave("trait_cors.jpeg", width = 30.1, height = 21.12, units = "cm")
+all_trait_cors <- ggarrange(P_others, N_others, leaf_whole_others, LMA_others, nrow = 4)
+ggsave("trait_cors.jpeg", width = 33, height = 33, units = "cm")
 
 #GR correlations for species at age c("mean_g_diameter", "mean_g_height", "mean_g_leaf_area", "mean_g_inv", "mean_g_gross_inv")
 GR_types_mean = c("mean_g_diameter")
@@ -141,25 +198,49 @@ growth_data %>% ggplot(aes(log10(age), (mean_N_area))) + geom_point() +
   scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32))
 
 # trait against age logging the trait 
-growth_data %>% ggplot(aes(log10(age), log10(wood_density))) + geom_point() +
-  geom_smooth(method = 'loess') +
+WD_age <- growth_data %>% ggplot(aes(log10(age), log10(wood_density))) + geom_point() +
+  geom_smooth(method = 'loess') + ylab(bquote(Wood~density~(g/cm^3))) + xlab(bquote(Age~(yrs))) +
   scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32)) +
-  scale_y_continuous(breaks = c(-0.25, -0.2, -0.15, -0.1, -0.05), label = c(0.56, 0.63, 0.71, 0.79, 0.89))
+  scale_y_continuous(breaks = c(-0.25, -0.2, -0.15, -0.1, -0.05), label = c(0.56, 0.63, 0.71, 0.79, 0.89)) +
+  theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+        axis.text = element_text(size=12))
 
-growth_data %>% mutate(LMA = (LMA*10)) %>% ggplot(aes(log10(age), log10(LMA))) + geom_point() +
-  geom_smooth(method = 'loess') +
+LMA_age <- growth_data %>% mutate(LMA = (LMA*10)) %>% ggplot(aes(log10(age), log10(LMA))) + geom_point() +
+  geom_smooth(method = 'loess') + ylab(bquote(Leaf~mass~area~(kg/m^2))) + xlab(bquote(Age~(yrs))) +
   scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32)) +
-  scale_y_continuous(breaks = c(-0.9, -0.6, -0.3), label = c(0.13, 0.25, 0.5))
+  scale_y_continuous(breaks = c(-0.9, -0.6, -0.3), label = c(0.13, 0.25, 0.5)) +
+    theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+          axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+          axis.text = element_text(size=12))
 
-growth_data %>% ggplot(aes(log10(age), log10(mean_P_area))) + geom_point()+
-  geom_smooth(method = 'loess') +
+leaf_whole_age <- growth_data %>% ggplot(aes(log10(age), log10(mean_leaf_m_whole))) + geom_point() +
+  geom_smooth(method = 'loess') + ylab(bquote(Leaf/total~mass~(mg/mg^-1))) + xlab(bquote(Age~(yrs))) +
   scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32)) +
-  scale_y_continuous(breaks = c(1, 1.5, 2, 2.5, 3), label = c(10, 31.6, 100, 316.2, 1000))
+  scale_y_continuous(breaks = c(-1.2, -0.9, -0.6, -0.3), label = c(0.06,0.13, 0.25, 0.5)) +
+  theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+        axis.text = element_text(size=12))
 
-growth_data %>% ggplot(aes(log10(age), log10(mean_N_area))) + geom_point() +
-  geom_smooth(method = 'loess') +
+P_age <- growth_data %>% ggplot(aes(log10(age), log10(mean_P_area))) + geom_point()+
+  geom_smooth(method = 'loess') + ylab(bquote(Leaf~P[area]~(units))) + xlab(bquote(Age~(yrs))) +
   scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32)) +
-  scale_y_continuous(breaks = c(-1, -0.5, 0, 0.5), label = c(0.1, 0.32, 1, 3.2))
+  scale_y_continuous(breaks = c(1, 1.5, 2, 2.5, 3), label = c(10, 31.6, 100, 316.2, 1000)) +
+  theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+        axis.text = element_text(size=12))
+  
+N_age <- growth_data %>% ggplot(aes(log10(age), log10(mean_N_area))) + geom_point() +
+  geom_smooth(method = 'loess') + ylab(bquote(Leaf~N[area]~(units))) + xlab(bquote(Age~(yrs))) +
+  scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32)) +
+  scale_y_continuous(breaks = c(-1, -0.5, 0, 0.5), label = c(0.1, 0.32, 1, 3.2))+
+  theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+        axis.text = element_text(size=12))
+
+traits_age <- ggarrange(WD_age, LMA_age, leaf_whole_age, P_age, N_age)
+ggsave("traits_age.jpeg", width = 33, height = 20, units = "cm")
+
 
 #GRs against age not logged
 growth_data %>% ggplot(aes(log10(age), (mean_g_diameter))) + geom_point() +
