@@ -45,12 +45,14 @@ growth_data <- all_data_growth %>%
          mean_g_leaf_area_s = mean(growth_leaf_area, na.rm = TRUE),
          mean_g_gross_inv_s = mean(gross_inv, na.rm = TRUE), 
          mean_LMA_s = mean(LMA, na.rm = TRUE), 
-         mean_ratio_leaf_stem_s = mean(ratio_leaf_stem, na.rm = TRUE)) %>% 
+         mean_ratio_leaf_stem_s = mean(ratio_leaf_stem, na.rm = TRUE), 
+         mean_P_area_s = mean(mean_P_area, na.rm = TRUE), 
+         mean_N_area_s = mean(mean_N_area, na.rm = TRUE)) %>% 
   ungroup()
 
-formula1 <- y~x
 
 growth_data$age <- factor(growth_data$age, levels = c("1.4", "2.4", "5", "7", "9", "32"))
+
 
 # plotting traits and diameter growth
 plotting_trait_growth <- function(data = growth_data, GR, response) {

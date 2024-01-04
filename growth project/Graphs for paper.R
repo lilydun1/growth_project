@@ -180,23 +180,6 @@ height_others_ind <- ggarrange(plotlist = GR_cor_ind, common.legend = TRUE, nrow
 
 GR_cor_ind_plots <- ggarrange(gross_inv_others_ind, inv_others_ind, la_others_ind, height_others_ind, nrow = 4)
 
-#each trait with age not logging the trait 
-growth_data %>% ggplot(aes(log10(age), (wood_density))) + geom_point() +
-  geom_smooth(method = 'loess') +
-  scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32))
-
-growth_data %>% mutate(LMA = (LMA*10)) %>% ggplot(aes(log10(age), (LMA))) + geom_point() +
-  geom_smooth(method = 'loess') +
-  scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32))
-
-growth_data %>% ggplot(aes(log10(age), (mean_P_area))) + geom_point()+
-  geom_smooth(method = 'loess') +
-  scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32))
-
-growth_data %>% ggplot(aes(log10(age), (mean_N_area))) + geom_point() +
-  geom_smooth(method = 'loess') +
-  scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32))
-
 # trait against age logging the trait 
 WD_age <- growth_data %>% ggplot(aes(log10(age), log10(wood_density))) + geom_point() +
   geom_smooth(method = 'loess') + ylab(bquote(Wood~density~(g/cm^3))) + xlab(bquote(Age~(yrs))) +
@@ -241,54 +224,47 @@ N_age <- growth_data %>% ggplot(aes(log10(age), log10(mean_N_area))) + geom_poin
 traits_age <- ggarrange(WD_age, LMA_age, leaf_whole_age, P_age, N_age)
 ggsave("traits_age.jpeg", width = 33, height = 20, units = "cm")
 
-
-#GRs against age not logged
-growth_data %>% ggplot(aes(log10(age), (mean_g_diameter))) + geom_point() +
-  geom_smooth(method = 'loess') +
-  scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32))
-
-growth_data %>% ggplot(aes(log10(age), (mean_g_height))) + geom_point() +
-  geom_smooth(method = 'loess') +
-  scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32))
-
-growth_data %>% ggplot(aes(log10(age), (mean_g_leaf_area))) + geom_point() +
-  geom_smooth(method = 'loess') +
-  scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32))
-
-growth_data %>% mutate(mean_g_gross_inv = (mean_g_gross_inv*0.001), 
-                       mean_g_inv = (mean_g_inv*0.001)) %>% ggplot(aes(log10(age), (mean_g_inv))) + geom_point() +
-  geom_smooth(method = 'loess') +
-  scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32))
-
-growth_data %>% mutate(mean_g_gross_inv = (mean_g_gross_inv*0.001), 
-                       mean_g_inv = (mean_g_inv*0.001)) %>% ggplot(aes(log10(age), (mean_g_gross_inv))) + geom_point() +
-  geom_smooth(method = 'loess') +
-  scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32))
-
 #GRs against age logged
-growth_data %>% ggplot(aes(log10(age), log10(mean_g_diameter))) + geom_point() +
-  geom_smooth(method = 'loess') +
+diam_age <- growth_data %>% ggplot(aes(log10(age), log10(mean_g_diameter))) + geom_point() +
+  geom_smooth(method = 'loess') +ylab(bquote(Diameter~growth~(mm/yr))) + xlab(bquote(Age~(yrs))) +
   scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32)) +
-  scale_y_continuous(breaks = c(-0.5, 0, 0.5), label = c(0.32, 1, 3.2))
+  scale_y_continuous(breaks = c(-0.5, 0, 0.5), label = c(0.32, 1, 3.2)) +
+  theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+        axis.text = element_text(size=12))
 
-growth_data %>% ggplot(aes(log10(age), log10(mean_g_height))) + geom_point() +
-  geom_smooth(method = 'loess') +
+height_age <- growth_data %>% ggplot(aes(log10(age), log10(mean_g_height))) + geom_point() +
+  geom_smooth(method = 'loess') + ylab(bquote(Height~growth~(mm/yr))) + xlab(bquote(Age~(yrs))) +
   scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32))+
-  scale_y_continuous(breaks = c(1, 1.5, 2, 2.5), label = c(10, 31.6, 100, 316.2))
+  scale_y_continuous(breaks = c(1, 1.5, 2, 2.5), label = c(10, 31.6, 100, 316.2)) +
+  theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+        axis.text = element_text(size=12))
 
-growth_data %>% ggplot(aes(log10(age), log10(mean_g_leaf_area))) + geom_point() +
-  geom_smooth(method = 'loess') +
+la_age <- growth_data %>% ggplot(aes(log10(age), log10(mean_g_leaf_area))) + geom_point() +
+  geom_smooth(method = 'loess') + ylab(bquote(Leaf~area~growth~(mm^2/yr))) + xlab(bquote(Age~(yrs))) +
   scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32))+
-  scale_y_continuous(breaks = c(-1, 0, 1, 2, 3), label = c(0.01, 1, 10, 100, 1000))
+  scale_y_continuous(breaks = c(-1, 0, 1, 2, 3), label = c(0.01, 1, 10, 100, 1000)) +
+  theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+        axis.text = element_text(size=12))
 
-growth_data %>% mutate(mean_g_gross_inv = (mean_g_gross_inv*0.001), 
+inv_age <- growth_data %>% mutate(mean_g_gross_inv = (mean_g_gross_inv*0.001), 
                        mean_g_inv = (mean_g_inv*0.001)) %>% ggplot(aes(log10(age), log10(mean_g_inv))) + geom_point() +
-  geom_smooth(method = 'loess') +
+  geom_smooth(method = 'loess') + ylab(bquote(Aboveground~growth~(g/yr))) + xlab(bquote(Age~(yrs))) +
   scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32)) +
-  scale_y_continuous(breaks = c(-1, 0, 1, 2), label = c(0.01, 1, 10, 100))
+  scale_y_continuous(breaks = c(-1, 0, 1, 2), label = c(0.01, 1, 10, 100)) +
+  theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+        axis.text = element_text(size=12))
 
-growth_data %>% mutate(mean_g_gross_inv = (mean_g_gross_inv*0.001), 
+gross_inv_age <- growth_data %>% mutate(mean_g_gross_inv = (mean_g_gross_inv*0.001), 
                        mean_g_inv = (mean_g_inv*0.001)) %>% ggplot(aes(log10(age), log10(mean_g_gross_inv))) + geom_point() +
-  geom_smooth(method = 'loess') +
+  geom_smooth(method = 'loess') +ylab(bquote(Gross~investment~growth~(g/yr))) + xlab(bquote(Age~(yrs))) +
   scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32)) +
-  scale_y_continuous(breaks = c(0, 1, 2), label = c(1, 10, 100))
+  scale_y_continuous(breaks = c(0, 1, 2), label = c(1, 10, 100)) +
+  theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+        axis.text = element_text(size=12))
+GR_age <- ggarrange(diam_age, height_age, la_age, inv_age, gross_inv_age)
+ggsave("GR_age.jpeg", width = 33, height = 20, units = "cm")
