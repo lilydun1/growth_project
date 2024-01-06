@@ -30,17 +30,29 @@ for(i in GR_types_all) {
                        filter(get(i) > -0.00001) %>% 
                        distinct(mean_ratio_leaf_stem, .keep_all = TRUE)))
   print(summary(mod1))
+  
 }
 
+list_lma <- list()
 for(i in GR_types_all) {
-  mod1 <- lm(formula = paste("log10(", i, ") ~ log10(wood_density)*log10(mean_ratio_leaf_stem)", sep = ""),
+  list_lma[[i]] <- lm(formula = paste("log10(", i, ") ~ (age)+log10(LMA)", sep = ""),
              data = (growth_data %>% 
                        filter(get(i) > -0.00001) %>% 
                        distinct(mean_ratio_leaf_stem, .keep_all = TRUE)))
-  print(summary(mod1))
+}
+list_lma$mean_g_diameter
+
+for (i in GR_types_all) {
+  ggpredict(list_lma$I, terms = c("LMA", "age")) %>% 
+  ggplot(aes(log10(x), log10(predicted), colour = (group))) +
+  geom_line() +
+  labs(x = "log10(LMA)", y= "log10(mean_g_diameter)", colour = "Age") 
 }
 
-
+mod <- lm(formula = (log10(mean_g_diameter) ~ (age)+log10(wood_density)),
+          data = (growth_data %>% 
+                    filter(mean_g_diameter > -0.00001) %>% 
+                    distinct(mean_ratio_leaf_stem, .keep_all = TRUE)))
 mod_1 <- lm(formula = log10(mean_g_diameter) ~ log10(wood_density)*log10(mean_ratio_leaf_stem)*log10(LMA), 
             data = (growth_data %>% 
                       #filter(mean_g_leaf_area > -0.00001) %>% 
