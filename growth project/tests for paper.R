@@ -32,22 +32,50 @@ for(i in GR_types_all) {
   print(summary(mod1))
   
 }
+#
+mod <- lm(formula = log10(mean_g_diameter) ~ age +log10(LMA), 
+          data = growth_data %>% 
+            filter(mean_g_diameter > -0.00001) %>%  
+            distinct(mean_ratio_leaf_stem, .keep_all = TRUE))
 
-list_lma <- list()
-for(i in GR_types_all) {
-  list_lma[[i]] <- lm(formula = paste("log10(", i, ") ~ (age)+log10(LMA)", sep = ""),
-             data = (growth_data %>% 
-                       filter(get(i) > -0.00001) %>% 
-                       distinct(mean_ratio_leaf_stem, .keep_all = TRUE)))
-}
-list_lma$mean_g_diameter
-
-for (i in GR_types_all) {
-  ggpredict(list_lma$I, terms = c("LMA", "age")) %>% 
+ggpredict(mod, terms = c("LMA [all] ", "age")) %>% 
   ggplot(aes(log10(x), log10(predicted), colour = (group))) +
   geom_line() +
-  labs(x = "log10(LMA)", y= "log10(mean_g_diameter)", colour = "Age") 
+  geom_point()
+
+#
+plotting_predict <- function(data = growth_data, trait) {
+  list_lma <- list()
+  
+  for (i in GR_types_all) {
+    list_lma[[i]] <- lm(formula = paste("log10(", i , ") ~ (age) + log10(", trait, ")", sep = ""),
+                        data = (data %>% 
+                                  filter(get(i) > -0.00001) %>% 
+                                  distinct(mean_ratio_leaf_stem, .keep_all = TRUE)))
+  }
+  
+  plot_lma_list <- list()
+  
+  for (i in 1:5) {
+    plot_lma_list[[i]] <- ggpredict(list_lma[[i]], terms = c(paste(trait, "[all]"), "age")) %>% 
+      ggplot(aes(log10(x), log10(predicted), colour = (group))) +
+      geom_line() +
+      geom_point() + 
+      labs(x = paste("log10(", trait, ")"), y = paste("log10(", GR_types_all[i], ")"), colour = "Age") 
+  }
+  
+  return(plot_lma_list)
 }
+
+result_plots <- map(traits, ~plotting_predict(data = (growth_data %>%  distinct(mean_ratio_leaf_stem, .keep_all = TRUE)), 
+                                              trait = .x))
+class(growth_data$age)
+ggarrange(plotlist = result_plots[[1]], common.legend = TRUE)
+ggarrange(plotlist = result_plots[[2]], common.legend = TRUE)
+ggarrange(plotlist = result_plots[[3]], common.legend = TRUE)
+ggarrange(plotlist = result_plots[[4]], common.legend = TRUE)
+ggarrange(plotlist = result_plots[[5]], common.legend = TRUE)
+
 
 mod <- lm(formula = (log10(mean_g_diameter) ~ (age)+log10(wood_density)),
           data = (growth_data %>% 
