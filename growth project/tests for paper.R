@@ -43,7 +43,7 @@ ggpredict(mod, terms = c("LMA [all] ", "age")) %>%
   geom_line() +
   geom_point()
 
-#OG
+#Plotting the prediction of the model with the raw data points 
 plotting_predict <- function(data = growth_data, trait) {
   list_lma <- list()
   
@@ -57,23 +57,18 @@ plotting_predict <- function(data = growth_data, trait) {
   plot_lma_list <- list()
   
   for (i in 1:5) {
-  
+    data <- (growth_data %>% 
+               filter(get(GR_types_all[i]) > -0.00001) %>% 
+               distinct(mean_ratio_leaf_stem, .keep_all = TRUE))
+    
     plot_lma_list[[i]] <- 
       ggplot(aes(log10(x), log10(predicted), colour = (group)), 
              data = ggpredict(list_lma[[i]], terms = c(paste(trait, "[all]"), "age"))) +
       geom_line() +
+      geom_point(data = data, aes(x = log10(.data[[trait]]), y = log10(.data[[GR_types_all[i]]]), colour = as.factor(age))) +
       labs(x = paste("log10(", trait, ")"), y = paste("log10(", GR_types_all[i], ")"), colour = "Age") 
   }
-  
-  for (i in 1:5) {
-    data = (growth_data %>% 
-                    filter(get(GR_types_all[i]) > -0.00001) %>% 
-                    distinct(mean_ratio_leaf_stem, .keep_all = TRUE))
-    
-    plot_lma_list[[i]] <- plot_lma_list[[i]] +
-      geom_point(data = data, aes(x = log10(.data[[trait]]), y = log10(.data[[GR_types_all[i]]]), colour = as.factor(age)))
-  }
-  
+
   return(plot_lma_list)
 }
 
