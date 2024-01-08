@@ -43,7 +43,7 @@ ggpredict(mod, terms = c("LMA [all] ", "age")) %>%
   geom_line() +
   geom_point()
 
-#
+#OG
 plotting_predict <- function(data = growth_data, trait) {
   list_lma <- list()
   
@@ -57,11 +57,21 @@ plotting_predict <- function(data = growth_data, trait) {
   plot_lma_list <- list()
   
   for (i in 1:5) {
-    plot_lma_list[[i]] <- ggpredict(list_lma[[i]], terms = c(paste(trait, "[all]"), "age")) %>% 
-      ggplot(aes(log10(x), log10(predicted), colour = (group))) +
+  
+    plot_lma_list[[i]] <- 
+      ggplot(aes(log10(x), log10(predicted), colour = (group)), 
+             data = ggpredict(list_lma[[i]], terms = c(paste(trait, "[all]"), "age"))) +
       geom_line() +
-      geom_point() + 
       labs(x = paste("log10(", trait, ")"), y = paste("log10(", GR_types_all[i], ")"), colour = "Age") 
+  }
+  
+  for (i in 1:5) {
+    data = (growth_data %>% 
+                    filter(get(GR_types_all[i]) > -0.00001) %>% 
+                    distinct(mean_ratio_leaf_stem, .keep_all = TRUE))
+    
+    plot_lma_list[[i]] <- plot_lma_list[[i]] +
+      geom_point(data = data, aes(x = log10(.data[[trait]]), y = log10(.data[[GR_types_all[i]]]), colour = as.factor(age)))
   }
   
   return(plot_lma_list)
@@ -69,12 +79,27 @@ plotting_predict <- function(data = growth_data, trait) {
 
 result_plots <- map(traits, ~plotting_predict(data = (growth_data %>%  distinct(mean_ratio_leaf_stem, .keep_all = TRUE)), 
                                               trait = .x))
-class(growth_data$age)
 ggarrange(plotlist = result_plots[[1]], common.legend = TRUE)
 ggarrange(plotlist = result_plots[[2]], common.legend = TRUE)
 ggarrange(plotlist = result_plots[[3]], common.legend = TRUE)
 ggarrange(plotlist = result_plots[[4]], common.legend = TRUE)
 ggarrange(plotlist = result_plots[[5]], common.legend = TRUE)
+
+
+mod <- lm(formula = log10(mean_g_diameter) ~ (age) + log10(wood_density),
+   data = (growth_data %>% 
+             filter(mean_g_diameter > -0.00001) %>% 
+             distinct(mean_ratio_leaf_stem, .keep_all = TRUE)))
+
+ ggplot(aes(log10(x), log10(predicted), colour = (group)), 
+         data = ggpredict(mod, terms = c("wood_density [all]", "age"))) +
+  geom_line() +
+  geom_point(aes(log10(wood_density), log10(mean_g_diameter), colour = age), 
+             data = (growth_data %>% 
+                        filter(mean_g_diameter > -0.00001) %>% 
+                        distinct(mean_ratio_leaf_stem, .keep_all = TRUE))) + 
+  labs(x = "log10(wod_density)", y = "log10(mean_g_diameter)", colour = "Age") 
+
 
 
 mod <- lm(formula = (log10(mean_g_diameter) ~ (age)+log10(wood_density)),
