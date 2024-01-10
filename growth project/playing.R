@@ -1,8 +1,11 @@
-pacman::p_load(tidyverse, ggeffects, ggpmisc, ggpubr, easystats) 
+pacman::p_load(tidyverse, ggeffects, ggpmisc, ggpubr, easystats, scales) 
 
 species_meta <- read_csv("data/species.csv")
+
 all_data_growth <- read_csv("SummaryInd.csv")
-nutrient_data_raw <- read_csv("nutrient_data.csv") %>% filter(!is.na(age)) %>% 
+
+nutrient_data_raw <- read_csv("nutrient_data.csv") %>% 
+  filter(!is.na(age)) %>% 
   filter(tissue == "leaves") %>%  
   group_by(species, age) %>% 
   mutate(mean_P = mean(P,na.rm = TRUE), 
@@ -50,15 +53,16 @@ growth_data <- all_data_growth %>%
          mean_N_area_s = mean(mean_N_area, na.rm = TRUE)) %>% 
   ungroup()
 
-
 growth_data$age <- factor(growth_data$age, levels = c("1.4", "2.4", "5", "7", "9", "32"))
-
 
 # plotting traits and diameter growth
 plotting_trait_growth <- function(data = growth_data, GR, response) {
-  ggplot(data = data, aes(log10(.data[[response]]), log10(.data[[GR]]), col = age)) +
+  ggplot(data = data, aes((.data[[response]]), (.data[[GR]]), col = age)) +
     geom_point() + 
     geom_smooth(method = "lm", se = FALSE) +
+    #scale_x_log10() +
+    scale_y_log10() +
+    #stat_poly_eq(use_label(c("R2", "P", "n", "eq"))) +
     theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
           axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
           axis.text = element_text(size=12)) +
@@ -66,15 +70,23 @@ plotting_trait_growth <- function(data = growth_data, GR, response) {
     scale_color_manual(values=c("#c35f5d", "#e5874d","#b3a034", "#12a388", "#81d0e2", "#8282b4"))
 }
 
+growth_data %>% 
+  ggplot(aes(log10(mean_leaf_m_whole), log10(mean_g_diameter), col = age)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE)
+
 #for the correlations
-plotting_cors <- function(data = growth_data, GR, response) {
-  ggplot(data = data, aes(log10(.data[[response]]), log10(.data[[GR]]))) +
+plotting_cors <- function(data = growth_data, GR, response, x_label) {
+  ggplot(data = data, aes((.data[[response]]), (.data[[GR]]))) +
     geom_point() + 
-    #geom_smooth(method = "lm") +
-    stat_poly_eq(use_label(c("R2")), size = 6, hjust = -0.5) +
-  theme(text = element_text(size = 18), panel.background = element_blank(), 
-        axis.line = element_line(colour = "black"), 
-        axis.text = element_text(size=12))
+    # geom_smooth(method = "lm") +
+    stat_poly_eq(use_label(c("R2")), size = 5, label.x.npc = "left", label.y = "top") +
+    scale_x_log10() +
+    scale_y_log10() + # this one for LMF
+    labs(x = x_label) +
+    theme(text = element_text(size = 18), panel.background = element_blank(), 
+          axis.line = element_line(colour = "black"), 
+          axis.text = element_text(size = 12))
 }
 
 traits_Dgrowth_plots <- map(GR_types_abs, ~plotting_Dgrowth(response = "LMA", GR = .x))
