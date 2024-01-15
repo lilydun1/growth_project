@@ -51,7 +51,9 @@ growth_data <- all_data_growth %>%
          mean_ratio_leaf_stem_s = mean(ratio_leaf_stem, na.rm = TRUE), 
          mean_P_area_s = mean(mean_P_area, na.rm = TRUE), 
          mean_N_area_s = mean(mean_N_area, na.rm = TRUE)) %>% 
-  ungroup()
+  ungroup() %>% 
+  inner_join(species_meta, by = c("species" = "Abbreviation")) %>% 
+  dplyr::select(-c("Family", "Common_name", "Previous_names"))
 
 growth_data$age <- factor(growth_data$age, levels = c("1.4", "2.4", "5", "7", "9", "32"))
 

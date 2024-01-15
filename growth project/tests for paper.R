@@ -1,26 +1,33 @@
 #tests
 GR_types_all = c("mean_g_diameter", "mean_g_height", "mean_g_leaf_area", "mean_g_inv", "mean_g_gross_inv")
 traits = c("wood_density", "mean_leaf_m_whole", "mean_P_area", "mean_N_area", "LMA")
-ages <- c("1.4", "2.4","7","9", "32")
+ages <- c("1.4", "2.4","7", "5","9", "32")
 
-df <- growth_data %>% select(species, age, GR_types_all, traits) %>% group_by(age, species) %>% 
-  distinct(age, .keep_all = TRUE)
+df <- growth_data %>% select(species, age, mean_leaf_m_whole) %>% group_by(age, species) %>% 
+  distinct(age, .keep_all = TRUE) %>% ungroup() %>% group_by(age) %>% 
+  mutate(mean = (mean(mean_leaf_m_whole))) %>% 
+  mutate(max_gross = (max(mean_g_gross_inv*0.001)))
 
 write.csv(df, "Growth_data.csv")
 
 growth_data %>% select(LMA, mean_ratio_leaf_stem)
 
 
+mod <- lm(log10(mean_g_gross_inv)~log10(age)*log10(wood_density), data = (growth_data %>% group_by(age, species) %>% 
+                                               distinct(age, .keep_all = TRUE) %>% 
+                                                 mutate(mean_g_gross_inv = mean_g_gross_inv*0.001)))
 
 #log10(wood_density)+log10(mean_leaf_m_whole)+log10(mean_P_area)+log10(mean_N_area)+log10(LMA)
 #going through each of the ages 
 
+
 for(i in ages) {
-  mod <- lm(log10(mean_g_gross_inv)~log10(mean_N_area), 
+  mod <- lm(log10(mean_g_gross_inv)~log10(wood_density), 
             data = (growth_data %>% 
-                      #filter(mean_g_leaf_area > -0.00001) %>%
-                      distinct(mean_ratio_leaf_stem, .keep_all = TRUE) %>% 
-                      filter(age == i)))
+                      #filter(mean_g_leaf_area > -0.00001) %>% 
+                      filter(age == i) %>% 
+                      group_by(age, species) %>% 
+                      distinct(age, .keep_all = TRUE)))
   print(summary(mod))
 }
 
@@ -69,13 +76,32 @@ ggpredict(mod, terms = c("LMA [all] ", "age")) %>%
 
 #Plotting the prediction of the model with the raw data points 
 plotting_predict <- function(data = growth_data, trait) {
+  
   list_lma <- list()
+  list_lma_no_inter <- list()
   
   for (i in GR_types_all) {
-    list_lma[[i]] <- lm(formula = paste("log10(", i , ") ~ (age) + log10(", trait, ")", sep = ""),
+    if(trait == "mean_leaf_m_whole") {
+    list_lma[[i]] <- lm(formula = paste("log10(", i , ") ~ log10(age)*(", trait, ")", sep = ""),
                         data = (data %>% 
                                   filter(get(i) > -0.00001) %>% 
                                   distinct(mean_ratio_leaf_stem, .keep_all = TRUE)))
+    
+    list_lma_no_inter[[i]] <- lm(formula = paste("log10(", i , ") ~ log10(age)+(", trait, ")", sep = ""),
+                        data = (data %>% 
+                                  filter(get(i) > -0.00001) %>% 
+                                  distinct(mean_ratio_leaf_stem, .keep_all = TRUE)))
+    } else {
+      list_lma[[i]] <- lm(formula = paste("log10(", i , ") ~ log10(age)*log10(", trait, ")", sep = ""),
+                          data = (data %>% 
+                                    filter(get(i) > -0.00001) %>% 
+                                    distinct(mean_ratio_leaf_stem, .keep_all = TRUE)))
+      
+      list_lma_no_inter[[i]] <- lm(formula = paste("log10(", i , ") ~ log10(age)+log10(", trait, ")", sep = ""),
+                                   data = (data %>% 
+                                             filter(get(i) > -0.00001) %>% 
+                                             distinct(mean_ratio_leaf_stem, .keep_all = TRUE)))
+    }
   }
   
   plot_lma_list <- list()
@@ -84,13 +110,39 @@ plotting_predict <- function(data = growth_data, trait) {
     data <- (growth_data %>% 
                filter(get(GR_types_all[i]) > -0.00001) %>% 
                distinct(mean_ratio_leaf_stem, .keep_all = TRUE))
-    
+    if (trait == "mean_leaf_m_whole") {
+      if (summary(list_lma[[i]])$coefficients[4,4] < 0.05) {
+      plot_lma_list[[i]] <- 
+        ggplot(aes((x), log10(predicted), colour = (group)), 
+               data = ggpredict(list_lma[[i]], terms = c(paste(trait, "[all]"), "age"))) +
+        geom_line() +
+        geom_point(data = data, aes(x = (.data[[trait]]), y = log10(.data[[GR_types_all[i]]]), colour = as.factor(age))) +
+        labs(x = paste("(", trait, ")"), y = paste("log10(", GR_types_all[i], ")"), colour = "Age") 
+    } else {
+      plot_lma_list[[i]] <- 
+        ggplot(aes((x), log10(predicted), colour = (group)), 
+               data = ggpredict(list_lma_no_inter[[i]], terms = c(paste(trait, "[all]"), "age"))) +
+        geom_line() +
+        geom_point(data = data, aes(x = (.data[[trait]]), y = log10(.data[[GR_types_all[i]]]), colour = as.factor(age))) +
+        labs(x = paste("(", trait, ")"), y = paste("log10(", GR_types_all[i], ")"), colour = "Age") 
+      } 
+      } else {if (summary(list_lma[[i]])$coefficients[4,4] < 0.05) {
     plot_lma_list[[i]] <- 
       ggplot(aes(log10(x), log10(predicted), colour = (group)), 
              data = ggpredict(list_lma[[i]], terms = c(paste(trait, "[all]"), "age"))) +
       geom_line() +
       geom_point(data = data, aes(x = log10(.data[[trait]]), y = log10(.data[[GR_types_all[i]]]), colour = as.factor(age))) +
       labs(x = paste("log10(", trait, ")"), y = paste("log10(", GR_types_all[i], ")"), colour = "Age") 
+    }
+        else {
+    plot_lma_list[[i]] <- 
+      ggplot(aes(log10(x), log10(predicted), colour = (group)), 
+             data = ggpredict(list_lma_no_inter[[i]], terms = c(paste(trait, "[all]"), "age"))) +
+      geom_line() +
+      geom_point(data = data, aes(x = log10(.data[[trait]]), y = log10(.data[[GR_types_all[i]]]), colour = as.factor(age))) +
+      labs(x = paste("log10(", trait, ")"), y = paste("log10(", GR_types_all[i], ")"), colour = "Age") 
+    }
+      }
   }
 
   return(plot_lma_list)
@@ -105,7 +157,7 @@ ggarrange(plotlist = result_plots[[4]], common.legend = TRUE)
 ggarrange(plotlist = result_plots[[5]], common.legend = TRUE)
 
 
-mod <- lm(formula = log10(mean_g_diameter) ~ (age) + log10(wood_density),
+mod <- lm(formula = log10(mean_g_diameter) ~ log10(age)* log10(wood_density),
    data = (growth_data %>% 
              filter(mean_g_diameter > -0.00001) %>% 
              distinct(mean_ratio_leaf_stem, .keep_all = TRUE)))

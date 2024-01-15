@@ -196,169 +196,179 @@ WD_age <- growth_data %>%
   filter(age %in% c(7,9, 32)) %>% 
   group_by(age, species) %>% distinct(age, .keep_all = TRUE) %>% 
   ggplot(aes((age), (wood_density))) + geom_point() + 
-    stat_poly_eq(use_label(c("n")), size = 5, label.x.npc = "right", label.y = "top") +
     ylab(bquote(WD~(g/cm^3))) + 
     xlab(bquote(Age~(yrs))) +
     scale_x_log10() +
     scale_y_log10() +
-    #scale_x_continuous(breaks = c(7, 9, 32), label = c(7, 9, 32)) +
-    #scale_y_continuous(breaks = c(-0.25, -0.2, -0.15, -0.1, -0.05), label = c(0.56, 0.63, 0.71, 0.79, 0.89)) +
     theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
         axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
-        axis.text = element_text(size=12))
+        axis.text = element_text(size=12), legend.position="none")
 
 LMA_age <- growth_data %>% 
   group_by(age, species) %>% 
   distinct(age, .keep_all = TRUE) %>% 
-  ggplot(aes((age), (LMA))) + geom_point() +
-    geom_smooth(method = 'lm') + 
+  ggplot(aes(age, LMA)) + 
+    geom_smooth(method = 'lm', color = "black") + 
     ylab(bquote(LMA~(g/cm^2))) + 
     xlab(bquote(Age~(yrs))) +
     scale_x_log10() +
     scale_y_log10() +
-    stat_poly_eq(use_label(c("R2", "n")), size = 5, label.x.npc = "right", label.y = "top") +
-    #scale_x_continuous(breaks = c(1.4, 2.4, 5, 7, 9, 32), label = c(1.4, 2.4, 5, 7, 9, 32)) +
-    #scale_y_continuous(breaks = c(-2, -1.6, -1.2), label = c(0.01, 0.025, 0.63)) +
+    geom_point(aes((age), (LMA), col = Species_name), alpha = 0.2) +
+    geom_line(aes((age), (LMA), col = Species_name), alpha = 0.2, size = 0.8) +
+    stat_poly_eq(use_label(c("eq", "R2", "P")), size = 5, label.x.npc = "right", label.y = "top") +
     theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
           axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
-          axis.text = element_text(size=12), axis.title.x = element_text(colour="white"))
+          axis.text = element_text(size=12), axis.title.x = element_text(colour="white"), legend.position="none") 
 
 leaf_whole_age <- growth_data %>% 
   group_by(age, species) %>% 
   distinct(age, .keep_all = TRUE) %>% 
-  ggplot(aes((age), (mean_leaf_m_whole))) + geom_point() +
-    geom_smooth(method = 'lm') + 
+  ggplot(aes(age, mean_leaf_m_whole)) + 
+    geom_smooth(method = 'lm', color = "black") + 
     ylab(bquote(LMF~(mg/mg^-1))) + 
     xlab(bquote(Age~(yrs))) +
-    scale_y_log10() +
-    stat_poly_eq(use_label(c("R2", "n")), size = 5, label.x.npc = "right", label.y = "top") +
-    #scale_x_continuous(breaks = c(1.4, 2.4, 5, 7, 9, 32), label = c(1.4, 2.4, 5, 7, 9, 32)) +
-    #scale_y_continuous(breaks = c(-1.2, -0.9, -0.6, -0.3), label = c(0.06,0.13, 0.25, 0.5)) +
+    scale_x_log10() +
+    geom_point(aes((age), (mean_leaf_m_whole), col = Species_name),  alpha = 0.2) +
+    geom_line(aes((age), (mean_leaf_m_whole), col = Species_name), alpha = 0.2, size = 0.8) +
+    stat_poly_eq(use_label(c("eq","R2", "P")), size = 5, label.x.npc = "right", label.y = "top") +
     theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
         axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
-        axis.text = element_text(size=12), axis.title.x = element_text(colour="white"))
+        axis.text = element_text(size=12), axis.title.x = element_text(colour="white"), legend.position="none")
 
 P_age <- growth_data %>% 
+  filter(age != 5) %>% 
   group_by(age, species) %>% 
   distinct(age, .keep_all = TRUE) %>% 
-  ggplot(aes((age), (mean_P_area))) + geom_point()+
-    geom_smooth(method = 'lm') + 
+  ggplot(aes(age, mean_P_area)) + 
+    geom_smooth(method = 'lm', color = "black") + 
     ylab(bquote(P[area]~(g/cm^2))) + 
     xlab(bquote(Age~(yrs))) +
     scale_x_log10() +
     scale_y_log10() +
-    stat_poly_eq(use_label(c("R2", "n")), size = 5, label.x.npc = "right", label.y = "top") +
-    #scale_x_continuous(breaks = c(1.4, 2.4, 5, 7, 9, 32), label = c(1.4, 2.4, 5, 7, 9, 32)) +
-    #scale_y_continuous(breaks = c(1, 1.5, 2, 2.5, 3), label = c(10, 31.6, 100, 316.2, 1000)) +
+  geom_point(aes((age), (mean_P_area), col = species),  alpha = 0.2)+
+  geom_line(aes((age), (mean_P_area), col = species), alpha = 0.2, size = 0.8) +
+    stat_poly_eq(use_label(c("eq","R2", "P")), size = 5, label.x.npc = "right", label.y = "top") +
     theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
         axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
-        axis.text = element_text(size=12))
+        axis.text = element_text(size=12), legend.position="none")
   
 N_age <- growth_data %>% 
+  filter(age != 5) %>% 
   group_by(age, species) %>% 
   distinct(age, .keep_all = TRUE) %>% 
-  ggplot(aes((age), (mean_N_area))) + geom_point() +
-    geom_smooth(method = 'lm') + 
+  ggplot(aes(age, mean_N_area)) +
+    geom_smooth(method = 'lm', color = "black") + 
     ylab(bquote(N[area]~(g/cm^2))) + 
     xlab(bquote(Age~(yrs))) +
     scale_x_log10() +
     scale_y_log10() +
-    stat_poly_eq(use_label(c("R2", "n")), size = 5, label.x.npc = "right", label.y = "top") +
-    #scale_x_continuous(breaks = c(1.4, 2.4, 5, 7, 9, 32), label = c(1.4, 2.4, 5, 7, 9, 32)) +
-    #scale_y_continuous(breaks = c(-1, -0.5, 0, 0.5), label = c(0.1, 0.32, 1, 3.2))+
+  geom_point(aes((age), (mean_N_area), col = species),  alpha = 0.2) +
+  geom_line(aes((age), (mean_N_area), col = species), alpha = 0.2, size = 0.8) +
+    stat_poly_eq(use_label(c("eq","R2", "P")), size = 5, label.x.npc = "right", label.y = "top") +
     theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
         axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
-        axis.text = element_text(size=12))
+        axis.text = element_text(size=12), legend.position="none")
 
-traits_age <- ggarrange(LMA_age, leaf_whole_age, P_age, N_age, WD_age, labels = c("a", "b", "c", "d", "e"), 
-                        font.label = list(size = 18), ncol = 3, nrow = 2, align = c("v"))
-ggsave("traits_age.jpeg", width = 33, height = 20, units = "cm")
+trait_age_legend <- ggplot(growth_data, aes(x = age, y = mean_N_area, color = Species_name))+
+  geom_point(alpha = 0.2)+
+  geom_line(alpha = 0.2, size = 0.8) +
+  lims(x = c(0,0), y = c(0,0))+
+  theme_void()+
+  theme(legend.position = c(0.5,0.5),
+        legend.key.size = unit(1, "cm"),
+        legend.text = element_text(size =  12),
+        legend.title = element_text(size = 15)) +
+  labs(colour = "Species")+ 
+  guides(color = guide_legend(nrow = 7))
+
+traits_age <- ggarrange(LMA_age, leaf_whole_age, P_age, N_age, WD_age, trait_age_legend, labels = c("a", "b", "c", "d", "e"))
+ggsave("traits_age.jpeg", width = 38, height = 22, units = "cm")
 
 #GRs against age logged
 diam_age <- growth_data %>% 
   group_by(age, species) %>% 
   distinct(age, .keep_all = TRUE) %>%
-  ggplot(aes((age), (mean_g_diameter))) + geom_point() +
-    stat_poly_eq(use_label(c("R2", "n")), size = 5, label.x.npc = "right") +
-    geom_smooth(method = 'lm') + 
+  ggplot(aes(age, mean_g_diameter)) + 
+    stat_poly_eq(use_label(c("eq", "R2", "P")), size = 5, label.x.npc = "right") +
+    geom_smooth(method = 'lm', col = "black") + 
     ylab(bquote(G[diam]~(mm/yr))) + 
     xlab(bquote(Age~(yrs))) +
     scale_x_log10() +
     scale_y_log10() +
-    #scale_x_continuous(breaks = c(1.4, 2.4, 5, 7, 9, 32), label = c(1.4, 2.4, 5, 7, 9, 32)) +
-    #scale_y_continuous(breaks = c(-0.5, 0, 0.5), label = c(0.32, 1, 3.2)) +
+  geom_point(aes((age), (mean_g_diameter), col = species),  alpha = 0.2) +
+  geom_line(aes((age), (mean_g_diameter), col = species), alpha = 0.2, size = 0.8) +
     theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
         axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
-        axis.text = element_text(size=12), axis.title.x = element_text(colour="white"))
+        axis.text = element_text(size=12), axis.title.x = element_text(colour="white"), legend.position="none")
 
 height_age <- growth_data %>% 
   group_by(age, species) %>% 
   distinct(age, .keep_all = TRUE) %>% 
-  ggplot(aes((age), (mean_g_height))) + geom_point() +
-  stat_poly_eq(use_label(c("R2", "n")), size = 5, label.x.npc = "right") +
-  geom_smooth(method = 'lm') + 
+  ggplot(aes(age, mean_g_height)) +
+  stat_poly_eq(use_label(c("eq","R2", "P")), size = 5, label.x.npc = "right") +
+  geom_smooth(method = 'lm', colour = "black") + 
   ylab(bquote(G[height]~(mm/yr))) + 
   xlab(bquote(Age~(yrs))) +
   scale_x_log10() +
   scale_y_log10() +
-  #scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32))+
-  #scale_y_continuous(breaks = c(1, 1.5, 2, 2.5), label = c(10, 31.6, 100, 316.2)) +
+  geom_point(aes((age), (mean_g_height), col = species),  alpha = 0.2) +
+  geom_line(aes((age), (mean_g_height), col = species), alpha = 0.2, size = 0.8) +
   theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
         axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
-        axis.text = element_text(size=12), axis.title.x = element_text(colour="white"))
+        axis.text = element_text(size=12), axis.title.x = element_text(colour="white"), legend.position="none")
 
 la_age <- growth_data %>% 
   group_by(age, species) %>% 
   distinct(age, .keep_all = TRUE) %>% 
-  ggplot(aes((age), (mean_g_leaf_area))) + geom_point() +
-    stat_poly_eq(use_label(c("R2", "n")), size = 5, label.x.npc = "right") +
-    geom_smooth(method = 'lm') + 
+  ggplot(aes(age, mean_g_leaf_area)) + 
+    stat_poly_eq(use_label(c("eq","R2", "P")), size = 5, label.x.npc = "right") +
+    geom_smooth(method = 'lm', colour = "black") + 
     ylab(bquote(G[leaf~area]~(mm^2/yr))) + 
     xlab(bquote(Age~(yrs))) +
     scale_x_log10() +
     scale_y_log10() +
-    #scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32))+
-    #scale_y_continuous(breaks = c(-1, 0, 1, 2, 3), label = c(0.01, 1, 10, 100, 1000)) +
+  geom_point(aes((age), (mean_g_leaf_area), col = species),  alpha = 0.2) +
+  geom_line(aes((age), (mean_g_leaf_area), col = species), alpha = 0.2, size = 0.8) +
     theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
         axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
-        axis.text = element_text(size=12))
+        axis.text = element_text(size=12), legend.position="none")
 
 inv_age <- growth_data %>% 
   mutate(mean_g_gross_inv = (mean_g_gross_inv*0.001), 
          mean_g_inv = (mean_g_inv*0.001)) %>% 
   group_by(age, species) %>% 
   distinct(age, .keep_all = TRUE) %>% 
-  ggplot(aes((age), (mean_g_inv))) + geom_point() +
-    stat_poly_eq(use_label(c("R2", "n")), size = 5, label.x.npc = "right") +
-    geom_smooth(method = 'lm') + 
+  ggplot(aes(age, mean_g_inv)) + 
+    stat_poly_eq(use_label(c("eq","R2", "P")), size = 5, label.x.npc = "right") +
+    geom_smooth(method = 'lm', colour = "black") + 
     ylab(bquote(G[net]~(g/yr))) + 
     xlab(bquote(Age~(yrs))) +
     scale_x_log10() +
     scale_y_log10() +
-    #scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32)) +
-    #scale_y_continuous(breaks = c(-1, 0, 1, 2), label = c(0.01, 1, 10, 100)) +
+  geom_point(aes((age), (mean_g_inv), col = species),  alpha = 0.2) +
+  geom_line(aes((age), (mean_g_inv), col = species), alpha = 0.2, size = 0.8) +
     theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
         axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
-        axis.text = element_text(size=12))
+        axis.text = element_text(size=12), legend.position="none")
 
 gross_inv_age <- growth_data %>% 
   mutate(mean_g_gross_inv = (mean_g_gross_inv*0.001), 
          mean_g_inv = (mean_g_inv*0.001)) %>% 
   group_by(age, species) %>% 
   distinct(age, .keep_all = TRUE) %>% 
-  ggplot(aes((age), (mean_g_gross_inv))) + geom_point() +
-    stat_poly_eq(use_label(c("R2", "n")), size = 5, label.x.npc = "right") +
-    geom_smooth(method = 'lm') + 
+  ggplot(aes(age, mean_g_gross_inv)) + 
+    stat_poly_eq(use_label(c("eq","R2", "P")), size = 5, label.x.npc = "right") +
+    geom_smooth(method = 'lm', colour = "black") + 
     ylab(bquote(G[gross]~(g/yr))) + 
     xlab(bquote(Age~(yrs))) +
     scale_x_log10() +
     scale_y_log10() +
-    #scale_x_continuous(breaks = c(0.146, 0.380, 0.699, 0.845, 0.954, 1.505), label = c(1.4, 2.4, 5, 7, 9, 32)) +
-    #scale_y_continuous(breaks = c(0, 1, 2), label = c(1, 10, 100)) +
+  geom_point(aes(age, mean_g_gross_inv, col = species),  alpha = 0.2) +
+  geom_line(aes(age, mean_g_gross_inv, col = species), alpha = 0.2, size = 0.8) +
     theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
         axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
-        axis.text = element_text(size=12))
+        axis.text = element_text(size=12), legend.position="none")
 
-GR_age <- ggarrange(diam_age, height_age, la_age, inv_age, gross_inv_age, labels = c("a", "b", "c", "d", "e"), 
+GR_age <- ggarrange(diam_age, height_age, la_age, inv_age, gross_inv_age, trait_age_legend, labels = c("a", "b", "c", "d", "e"), 
                     font.label = list(size = 18), ncol = 3, nrow = 2, align = c("v"))
-ggsave("GR_age.jpeg", width = 33, height = 20, units = "cm")
+ggsave("GR_age.jpeg", width = 45, height = 27, units = "cm")

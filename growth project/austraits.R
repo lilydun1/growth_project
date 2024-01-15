@@ -26,12 +26,13 @@ work <- pls %>% group_by(dataset_id, taxon_name, trait_name, location_name) %>%
   filter(!is.na(wood_density))
 
 #this plot is gg
-ggplot(data = (work), aes(log10(wood_density), log10(leaf_mass_per_area))) +
+wd_lma_austraits <- ggplot(data = (work), aes(log10(wood_density), log10(leaf_mass_per_area))) +
   geom_smooth(aes(group = location_name, colour = location_name), se = FALSE, method = "lm") +
   geom_smooth(se = FALSE, size = 2) +
   theme(legend.position="none") +
   #geom_line(data =work, aes(log10(leaf_mass_per_area), log10(wood_density)))#+
   stat_poly_eq(use_label(c("R2")), size = 6, hjust = -0.5)
+ggsave("wd_lma_austraits.jpeg", width = 25, height = 20, units = "cm")
 
 
 ggplot(data = (work), aes(log10(leaf_mass_per_area), log10(wood_density))) +
