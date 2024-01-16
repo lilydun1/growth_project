@@ -42,7 +42,7 @@ growth_data <- all_data_growth %>%
   mutate(mean_ratio_leaf_stem_s = mean(ratio_leaf_stem, na.rm = TRUE),
          mean_leaf_m_whole_s = mean(leaf_m_whole, na.rm = TRUE),
          mean_leaf_a_whole_s = mean(leaf_a_whole, na.rm = TRUE),
-         mean_g_stem_diameter_s = mean(growth_stem_diameter, na.rm = TRUE),
+         mean_g_diameter_s = mean(growth_stem_diameter, na.rm = TRUE),
          mean_g_height_s = mean(growth_height, na.rm = TRUE),
          mean_g_inv_s = mean(growth_inv, na.rm = TRUE), 
          mean_g_leaf_area_s = mean(growth_leaf_area, na.rm = TRUE),
@@ -53,7 +53,9 @@ growth_data <- all_data_growth %>%
          mean_N_area_s = mean(mean_N_area, na.rm = TRUE)) %>% 
   ungroup() %>% 
   inner_join(species_meta, by = c("species" = "Abbreviation")) %>% 
-  dplyr::select(-c("Family", "Common_name", "Previous_names"))
+  dplyr::select(-c("Family", "Common_name", "Previous_names")) %>% 
+  mutate(Species_name = str_replace(Species_name, "Leucopogon esquamatus", "Styphelia esquamata")) %>% 
+  arrange(Species_name)
 
 growth_data$age <- factor(growth_data$age, levels = c("1.4", "2.4", "5", "7", "9", "32"))
 
@@ -90,18 +92,5 @@ plotting_cors <- function(data = growth_data, GR, response, x_label) {
           axis.line = element_line(colour = "black"), 
           axis.text = element_text(size = 12))
 }
-
-traits_Dgrowth_plots <- map(GR_types_abs, ~plotting_Dgrowth(response = "LMA", GR = .x))
-ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE)
-
-traits_Dgrowth_plots <- map(traits_1, ~plotting_Dgrowth(response = .x, GR = "GR_w_indiv"))
-ggarrange(plotlist = traits_Dgrowth_plots, common.legend = TRUE)
-
-cor.test(growth_data$LMA, growth_data$wood_density)
-
-mod <- lm(log10(growth_diameter+0.2)~log10(LMA), data = (growth_data))
-tab_model(mod)
-
-
 
 
