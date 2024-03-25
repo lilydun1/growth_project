@@ -1,26 +1,24 @@
 GR_types_all = c("mean_g_diameter", "mean_g_height", "mean_g_leaf_area", "mean_g_inv", "mean_g_gross_inv")
 traits = c("wood_density", "mean_leaf_m_whole", "mean_P_area", "mean_N_area", "LMA")
-#figure 1: Wood density against all GRS
+#figure 4: Wood density against all GRS
 traits_growth_plots_wd <- map(GR_types_all, ~plotting_trait_growth(data = (growth_data%>% 
                                                                              mutate(mean_g_gross_inv = (mean_g_gross_inv*0.001), 
                                                                                     mean_g_inv = (mean_g_inv*0.001)) %>%
                                                                              group_by(age, species) %>% distinct(age, .keep_all = TRUE)),
                                                                   response = "wood_density", GR = .x))
 traits_growth_plots_wd[[1]] <- traits_growth_plots_wd[[1]] + ylab(bquote(G[diam]~(mm/yr))) + xlab(bquote(WD~(g/cm^3))) +
-                              theme(axis.title.x = element_text(colour="white")) 
+                              theme(axis.title.x = element_blank()) 
 traits_growth_plots_wd[[2]] <- traits_growth_plots_wd[[2]] + ylab(bquote(G[height]~(mm/yr))) + xlab(bquote(WD~(g/cm^3))) +
-                              theme(axis.title.x = element_text(colour="white")) 
-traits_growth_plots_wd[[3]] <- traits_growth_plots_wd[[3]] 
-                                + ylab(bquote(G[leaf~area]~(mm^2/yr))) + xlab(bquote(WD~(g/cm^3))) 
-traits_growth_plots_wd[[4]] <- traits_growth_plots_wd[[4]] 
-                                + ylab(bquote(G[net]~(g/yr))) + xlab(bquote(WD~(g/cm^3))) 
-traits_growth_plots_wd[[5]] <- traits_growth_plots_wd[[5]] 
-                                + ylab(bquote(G[gross]~(g/yr))) + xlab(bquote(WD~(g/cm^3))) 
+                              theme(axis.title.x = element_blank()) 
+traits_growth_plots_wd[[3]] <- traits_growth_plots_wd[[3]] + ylab(bquote(G[area]~(mm^2/yr))) + xlab(bquote(WD~(g/cm^3))) +
+                              theme(axis.title.x = element_blank())
+traits_growth_plots_wd[[4]] <- traits_growth_plots_wd[[4]] + ylab(bquote(G[net]~(g/yr))) + xlab(bquote(WD~(g/cm^3))) +
+                              theme(axis.title.x = element_blank())
+traits_growth_plots_wd[[5]] <- traits_growth_plots_wd[[5]] + ylab(bquote(G[gross]~(g/yr))) + xlab(bquote(WD~(g/cm^3))) 
 wd_paper <- ggarrange(plotlist = traits_growth_plots_wd, common.legend = TRUE, labels = c("a", "b", "c", "d", "e"), 
-                      font.label = list(size = 18), ncol = 3, nrow = 2, align = c("v"))
-ggsave("wd_paper.jpeg", width = 30.1, height = 21.12, units = "cm")
+                      font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v")) 
 
-#figure 2: LMA against all GRS
+#figure 4: LMA against all GRS
 ### change the scales here 
 traits_growth_plots_lma <- map(GR_types_all, ~plotting_trait_growth(data = (growth_data%>% 
                                                                               mutate(mean_g_gross_inv = (mean_g_gross_inv*0.001), 
@@ -28,33 +26,39 @@ traits_growth_plots_lma <- map(GR_types_all, ~plotting_trait_growth(data = (grow
                                                                               group_by(age, species) %>% distinct(age, .keep_all = TRUE)),
                                                                     response = "LMA", GR = .x))
 traits_growth_plots_lma[[1]] <- traits_growth_plots_lma[[1]] + ylab(bquote(G[diam]~(mm/yr))) + xlab(bquote(LMA~(g/cm^2))) +
-                              theme(axis.title.x = element_text(colour="white"))
+                                theme(axis.title.x = element_blank(), axis.title.y = element_blank()) 
 traits_growth_plots_lma[[2]] <- traits_growth_plots_lma[[2]] + ylab(bquote(G[height]~(mm/yr)))+ xlab(bquote(LMA~(g/cm^2))) +
-                              theme(axis.title.x = element_text(colour="white")) 
-traits_growth_plots_lma[[3]] <- traits_growth_plots_lma[[3]] + ylab(bquote(G[leaf~area]~(mm^2/yr))) + xlab(bquote(LMA~(g/cm^2))) 
-traits_growth_plots_lma[[4]] <- traits_growth_plots_lma[[4]] + ylab(bquote(G[net]~(g/yr))) + xlab(bquote(LMA~(g/cm^2))) 
-traits_growth_plots_lma[[5]] <- traits_growth_plots_lma[[5]] + ylab(bquote(G[gross]~(g/yr))) + xlab(bquote(LMA~(g/cm^2))) 
-lma_paper <- ggarrange(plotlist = traits_growth_plots_lma, common.legend = TRUE, labels = c("a", "b", "c", "d", "e"), 
-                       font.label = list(size = 18), ncol = 3, nrow = 2, align = c("v"))
-ggsave("lma_paper.jpeg", width = 30.1, height = 21.12, units = "cm")
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()) 
+traits_growth_plots_lma[[3]] <- traits_growth_plots_lma[[3]] + ylab(bquote(G[area]~(mm^2/yr))) + xlab(bquote(LMA~(g/cm^2))) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()) 
+traits_growth_plots_lma[[4]] <- traits_growth_plots_lma[[4]] + ylab(bquote(G[net]~(g/yr))) + xlab(bquote(LMA~(g/cm^2))) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()) 
+traits_growth_plots_lma[[5]] <- traits_growth_plots_lma[[5]] + ylab(bquote(G[gross]~(g/yr))) + xlab(bquote(LMA~(g/cm^2))) +
+  theme(axis.title.y = element_blank()) 
+lma_paper <- ggarrange(plotlist = traits_growth_plots_lma, common.legend = TRUE, labels = c("f", "g", "h", "i", "j"), 
+                       font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"))
+
+#combining WD and LMA to one figure 
+LMA_WD <- ggarrange(wd_paper, lma_paper)
+ggsave("figure_4_WD_LMA.jpeg", width = 23.91, height = 33.91, units = "cm")
 
 #figure leaf mass/ total mass 
-# REMEMBER TO NOT LOG IT 
 traits_growth_plots_lmf <- map(GR_types_all, ~plotting_trait_growth(data = (growth_data %>% 
                                                                                    mutate(mean_g_gross_inv = (mean_g_gross_inv*0.001), 
                                                                                           mean_g_inv = (mean_g_inv*0.001))%>% 
                                                                                    group_by(age, species) %>% distinct(age, .keep_all = TRUE)),
                                                                          response = "mean_leaf_m_whole", GR = .x))
 traits_growth_plots_lmf[[1]] <- traits_growth_plots_lmf[[1]] + ylab(bquote(G[diam]~(mm/yr))) + xlab(bquote(LMF~(mg/mg^-1))) +
-                                  theme(axis.title.x = element_text(colour="white"))
+  theme(axis.title.x = element_blank()) 
 traits_growth_plots_lmf[[2]] <- traits_growth_plots_lmf[[2]] + ylab(bquote(G[height]~(mm/yr)))+ xlab(bquote(LMF~(mg/mg^-1))) +
-                                  theme(axis.title.x = element_text(colour="white"))
-traits_growth_plots_lmf[[3]] <- traits_growth_plots_lmf[[3]] + ylab(bquote(G[leaf~area]~(mm^2/yr))) + xlab(bquote(LMF~(mg/mg^-1))) 
-traits_growth_plots_lmf[[4]] <- traits_growth_plots_lmf[[4]] + ylab(bquote(G[net]~(g/yr))) + xlab(bquote(LMF~(mg/mg^-1)))
+  theme(axis.title.x = element_blank()) 
+traits_growth_plots_lmf[[3]] <- traits_growth_plots_lmf[[3]] + ylab(bquote(G[area]~(mm^2/yr))) + xlab(bquote(LMF~(mg/mg^-1))) +
+  theme(axis.title.x = element_blank()) 
+traits_growth_plots_lmf[[4]] <- traits_growth_plots_lmf[[4]] + ylab(bquote(G[net]~(g/yr))) + xlab(bquote(LMF~(mg/mg^-1))) +
+  theme(axis.title.x = element_blank()) 
 traits_growth_plots_lmf[[5]] <- traits_growth_plots_lmf[[5]] + ylab(bquote(G[gross]~(g/yr))) + xlab(bquote(LMF~(mg/mg^-1)))
 lmf_paper <- ggarrange(plotlist = traits_growth_plots_lmf, common.legend = TRUE, labels = c("a", "b", "c", "d", "e"), 
-                         font.label = list(size = 18), ncol = 3, nrow = 2, align = c("v"))
-ggsave("lmf_paper.jpeg", width = 30.1, height = 21.12, units = "cm")
+                         font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"))
 
 #Mean leaf P area against all GRs
 traits_growth_plots_P <- map(GR_types_all, ~plotting_trait_growth(data = (growth_data %>% 
@@ -63,15 +67,17 @@ traits_growth_plots_P <- map(GR_types_all, ~plotting_trait_growth(data = (growth
                                                                             group_by(age, species) %>% distinct(age, .keep_all = TRUE)),
                                                                   response = "mean_P_area", GR = .x))
 traits_growth_plots_P[[1]] <- traits_growth_plots_P[[1]] + ylab(bquote(G[diam]~(mm/yr))) + xlab(bquote(P[area]~(g/cm^2))) +
-                            theme(axis.title.x = element_text(colour="white"))
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()) 
 traits_growth_plots_P[[2]] <- traits_growth_plots_P[[2]] + ylab(bquote(G[height]~(mm/yr)))+ xlab(bquote(P[area]~(g/cm^2))) +
-                              theme(axis.title.x = element_text(colour="white")) 
-traits_growth_plots_P[[3]] <- traits_growth_plots_P[[3]] + ylab(bquote(G[leaf~area]~(mm^2/yr))) + xlab(bquote(P[area]~(g/cm^2))) 
-traits_growth_plots_P[[4]] <- traits_growth_plots_P[[4]] + ylab(bquote(G[net]~(g/yr))) + xlab(bquote(P[area]~(g/cm^2))) 
-traits_growth_plots_P[[5]] <- traits_growth_plots_P[[5]] + ylab(bquote(G[gross]~(g/yr))) + xlab(bquote(P[area]~(g/cm^2)))
-P_paper <- ggarrange(plotlist = traits_growth_plots_P, common.legend = TRUE, labels = c("a", "b", "c", "d", "e"), 
-                          font.label = list(size = 18), ncol = 3, nrow = 2, align = c("v"))
-ggsave("P_paper.jpeg", width = 30.1, height = 21.12, units = "cm")
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()) + scale_y_continuous(breaks = c(1.2, 1.7, 2.3))
+traits_growth_plots_P[[3]] <- traits_growth_plots_P[[3]] + ylab(bquote(G[area]~(mm^2/yr))) + xlab(bquote(P[area]~(g/cm^2))) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()) 
+traits_growth_plots_P[[4]] <- traits_growth_plots_P[[4]] + ylab(bquote(G[net]~(g/yr))) + xlab(bquote(P[area]~(g/cm^2))) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()) 
+traits_growth_plots_P[[5]] <- traits_growth_plots_P[[5]] + ylab(bquote(G[gross]~(g/yr))) + xlab(bquote(P[area]~(g/cm^2))) +
+  theme(axis.title.y = element_blank()) 
+P_paper <- ggarrange(plotlist = traits_growth_plots_P, common.legend = TRUE, labels = c("f", "g", "h", "i", "j"), 
+                          font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"))
 
 #Mean leaf N area against all GRs
 traits_growth_plots_N <- map(GR_types_all, ~plotting_trait_growth(data = (growth_data %>%
@@ -80,15 +86,20 @@ traits_growth_plots_N <- map(GR_types_all, ~plotting_trait_growth(data = (growth
                                                                             group_by(age, species) %>% distinct(age, .keep_all = TRUE)),
                                                                   response = "mean_N_area", GR = .x))
 traits_growth_plots_N[[1]] <- traits_growth_plots_N[[1]] + ylab(bquote(G[diam]~(mm/yr))) + xlab(bquote(N[area]~(g/cm^2))) +
-                            theme(axis.title.x = element_text(colour="white"))
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()) 
 traits_growth_plots_N[[2]] <- traits_growth_plots_N[[2]] + ylab(bquote(G[height]~(mm/yr)))+ xlab(bquote(N[area]~(g/cm^2))) +
-                            theme(axis.title.x = element_text(colour="white")) 
-traits_growth_plots_N[[3]] <- traits_growth_plots_N[[3]] + ylab(bquote(G[leaf~area]~(mm^2/yr))) + xlab(bquote(N[area]~(g/cm^2))) 
-traits_growth_plots_N[[4]] <- traits_growth_plots_N[[4]] + ylab(bquote(G[net]~(g/yr))) + xlab(bquote(N[area]~(g/cm^2)))
-traits_growth_plots_N[[5]] <- traits_growth_plots_N[[5]] + ylab(bquote(G[gross]~(g/yr))) + xlab(bquote(N[area]~(g/cm^2)))
-N_paper <- ggarrange(plotlist = traits_growth_plots_N, common.legend = TRUE, labels = c("a", "b", "c", "d", "e"), vjust = 1, hjust = -3, 
-                          font.label = list(size = 18), ncol = 3, nrow = 2, align = c("v"))
-ggsave("N_paper.jpeg", width = 30.1, height = 21.12, units = "cm")
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()) + scale_y_continuous(breaks = c(1.2, 1.7, 2.3))
+traits_growth_plots_N[[3]] <- traits_growth_plots_N[[3]] + ylab(bquote(G[area]~(mm^2/yr))) + xlab(bquote(N[area]~(g/cm^2)))+
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()) 
+traits_growth_plots_N[[4]] <- traits_growth_plots_N[[4]] + ylab(bquote(G[net]~(g/yr))) + xlab(bquote(N[area]~(g/cm^2))) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()) 
+traits_growth_plots_N[[5]] <- traits_growth_plots_N[[5]] + ylab(bquote(G[gross]~(g/yr))) + xlab(bquote(N[area]~(g/cm^2))) +
+  theme(axis.title.y = element_blank()) 
+N_paper <- ggarrange(plotlist = traits_growth_plots_N, common.legend = TRUE, labels = c("k", "l", "m", "n", "o"), 
+                          font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"))
+
+ggarrange(lmf_paper, P_paper, N_paper, ncol = 3)
+ggsave("figure_5_LMF_P_N.jpeg", width = 23.91, height = 33.91, units = "cm")
 
 #Figure 3: The correlations of the traits at species level traits = c("wood_density", "mean_LMA_s","mean_P_area_s", "mean_N_area_s", "mean_leaf_m_whole_s")
 #c(bquote(WD~(g/cm^3)), bquote(LMA~(g/cm^2)), bquote(P[area]~(g/cm^2)), bquote(N[area]~(g/cm^2)), bquote(LMF~(mg/mg^-1)))
@@ -118,16 +129,16 @@ all_trait_cors <- ggarrange(leaf_whole_others, N_others, P_others, LMA_others, n
 ggsave("trait_cors.jpeg", width = 33, height = 33, units = "cm")
 
 #GR correlations for species at age c("mean_g_gross_inv","mean_g_inv", "mean_g_leaf_area", "mean_g_height", "mean_g_diameter")
-#c(bquote(G[gross]~(g/yr)), bquote(G[net]~(g/yr)), bquote(G[leaf~area]~(mm^2/yr)), bquote(G[height]~(mm/yr)), bquoteG[diam]~(mm/yr)))
+#c(bquote(G[gross]~(g/yr)), bquote(G[net]~(g/yr)), bquote(G[area]~(mm^2/yr)), bquote(G[height]~(mm/yr)), bquoteG[diam]~(mm/yr)))
 
-GR_types_mean = c("mean_g_gross_inv")
-GR_cor_mean <- map2(GR_types_mean, c(bquote(G[gross]~(g/yr))), 
+GR_types_mean = c("mean_g_gross_inv","mean_g_inv")
+GR_cor_mean <- map2(GR_types_mean, c(bquote(G[gross]~(g/yr)), bquote(G[net]~(g/yr))), 
                     ~plotting_cors(data = (growth_data %>% 
                                              mutate(mean_g_gross_inv = (mean_g_gross_inv*0.001), 
                                                                          mean_g_inv = (mean_g_inv*0.001)) %>% 
                                              group_by(age, species) %>% distinct(age, .keep_all = TRUE)),
-                     response = .x, GR = "mean_g_inv", x_label = .y)+
-                     ylab(bquote(G[net]~(g/yr))))
+                     response = .x, GR = "mean_g_leaf_area", x_label = .y) +
+                     ylab(bquote(G[area]~(mm^2/yr))))
 
 diam_others <- ggarrange(plotlist = GR_cor_mean, legend = "none", nrow=1, ncol = 4, labels = c("a", "b", "c", "d"), 
                               font.label = list(size = 18))
@@ -278,7 +289,7 @@ la_age <- growth_data %>%
   ggplot(aes(age, mean_g_leaf_area)) + 
     stat_poly_eq(use_label(c("eq","R2", "P")), size = 5, label.x.npc = "right", p.digits = 2) +
     geom_smooth(method = 'lm', colour = "black", linetype = "dashed") + 
-    ylab(bquote(G[leaf~area]~(mm^2/yr))) + 
+    ylab(bquote(G[area]~(mm^2/yr))) + 
     xlab(bquote(Age~(yrs))) +
     scale_x_log10() +
     scale_y_log10() +
@@ -298,8 +309,8 @@ inv_age <- growth_data %>%
     geom_smooth(method = 'lm', colour = "black") + 
     ylab(bquote(G[net]~(g/yr))) + 
     xlab(bquote(Age~(yrs))) +
+    scale_y_log10(breaks = c(1, 10, 100)) +
     scale_x_log10() +
-    scale_y_log10() +
   geom_point(aes((age), (mean_g_inv), col = species),  alpha = 0.2) +
   geom_line(aes((age), (mean_g_inv), col = species), alpha = 0.2, size = 0.8) +
     theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
@@ -329,7 +340,6 @@ ggsave("GR_age.jpeg", width = 36, height = 25.3, units = "cm")
 
 
 #Plotting the prediction of the model with the raw data points 
-traits = c("wood_density", "mean_leaf_m_whole", "mean_P_area", "mean_N_area", "LMA")
 plotting_predict <- function(data = growth_data, trait) {
   
   list_stats_inter <- list()
@@ -368,14 +378,24 @@ plotting_predict <- function(data = growth_data, trait) {
                  data = ggpredict(list_stats_inter[[i]], terms = c(paste(trait, "[all]"), "age"))) +
           geom_line() +
           geom_point(data = data, aes(x = (.data[[trait]]), y = log10(.data[[GR_types_all[i]]]), colour = as.factor(age))) +
-          labs(x = paste("(", trait, ")"), y = paste("log10(", GR_types_all[i], ")"), colour = "Age") 
+          labs(x = paste("(", trait, ")"), y = paste("log10(", GR_types_all[i], ")"), colour = "Age") +
+          theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+                axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+                axis.text = element_text(size=12)) +
+          labs(colour = "Age (yrs)") +
+          scale_color_manual(values=c("#c35f5d", "#e5874d","#b3a034", "#12a388", "#81d0e2", "#8282b4"))
       } else {
         plot_stats_list[[i]] <- 
           ggplot(aes((x), log10(predicted), colour = (group)), 
                  data = ggpredict(list_stats_no_inter[[i]], terms = c(paste(trait, "[all]"), "age"))) +
           geom_line() +
           geom_point(data = data, aes(x = (.data[[trait]]), y = log10(.data[[GR_types_all[i]]]), colour = as.factor(age))) +
-          labs(x = paste("(", trait, ")"), y = paste("log10(", GR_types_all[i], ")"), colour = "Age") 
+          labs(x = paste("(", trait, ")"), y = paste("log10(", GR_types_all[i], ")"), colour = "Age") +
+          theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+                axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+                axis.text = element_text(size=12)) +
+          labs(colour = "Age (yrs)") +
+          scale_color_manual(values=c("#c35f5d", "#e5874d","#b3a034", "#12a388", "#81d0e2", "#8282b4"))
       } 
     } 
     
@@ -386,7 +406,12 @@ plotting_predict <- function(data = growth_data, trait) {
                  data = ggpredict(list_stats_inter[[i]], terms = c(paste(trait, "[all]"), "age"))) +
           geom_line() +
           geom_point(data = data, aes(x = log10(.data[[trait]]), y = log10(.data[[GR_types_all[i]]]), colour = as.factor(age))) +
-          labs(x = paste("log10(", trait, ")"), y = paste("log10(", GR_types_all[i], ")"), colour = "Age") 
+          labs(x = paste("log10(", trait, ")"), y = paste("log10(", GR_types_all[i], ")"), colour = "Age") +
+          theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+                axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+                axis.text = element_text(size=12)) +
+          labs(colour = "Age (yrs)") +
+          scale_color_manual(values=c("#c35f5d", "#e5874d","#b3a034", "#12a388", "#81d0e2", "#8282b4"))
       }
       else {
         plot_stats_list[[i]] <- 
@@ -394,7 +419,12 @@ plotting_predict <- function(data = growth_data, trait) {
                  data = ggpredict(list_stats_no_inter[[i]], terms = c(paste(trait, "[all]"), "age"))) +
           geom_line() +
           geom_point(data = data, aes(x = log10(.data[[trait]]), y = log10(.data[[GR_types_all[i]]]), colour = as.factor(age))) +
-          labs(x = paste("log10(", trait, ")"), y = paste("log10(", GR_types_all[i], ")"), colour = "Age") 
+          labs(x = paste("log10(", trait, ")"), y = paste("log10(", GR_types_all[i], ")"), colour = "Age") +
+          theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+                axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+                axis.text = element_text(size=12)) +
+          labs(colour = "Age (yrs)") +
+          scale_color_manual(values=c("#c35f5d", "#e5874d","#b3a034", "#12a388", "#81d0e2", "#8282b4"))
       }
     }
   }
@@ -404,8 +434,38 @@ plotting_predict <- function(data = growth_data, trait) {
 
 result_plots <- map(traits, ~plotting_predict(data = (growth_data %>%  distinct(mean_ratio_leaf_stem, .keep_all = TRUE)), 
                                               trait = .x))
+label <- "label"
+for (i in seq_along(result_plots[[1]])) {
+  result_plots[[1]][2] <- result_plots[[1]][1] +
+    scale_x_log10() +
+    scale_y_log10() 
+}
+
+
 ggarrange(plotlist = result_plots[[1]], common.legend = TRUE)
+ggsave("model_WD.jpeg", width = 33, height = 33, units = "cm")
 ggarrange(plotlist = result_plots[[2]], common.legend = TRUE)
+ggsave("model_LMF.jpeg", width = 33, height = 33, units = "cm")
 ggarrange(plotlist = result_plots[[3]], common.legend = TRUE)
+ggsave("model_P.jpeg", width = 33, height = 33, units = "cm")
 ggarrange(plotlist = result_plots[[4]], common.legend = TRUE)
+ggsave("model_N.jpeg", width = 33, height = 33, units = "cm")
 ggarrange(plotlist = result_plots[[5]], common.legend = TRUE)
+ggsave("model_LMA.jpeg", width = 33, height = 33, units = "cm")
+
+basemap <- get_map('Kuringai National Park', zoom = 12, maptype = "satellite")
+
+data <- read.csv("data/sites.csv") %>% 
+  filter(age_at_harvest != 3) %>% 
+  mutate(age_at_harvest = case_when(age_at_harvest == 1.35 ~ 1.4, TRUE~age_at_harvest))
+
+map <- ggmap(basemap) + 
+  labs(x = "Longitude", y = "Latitude") +
+  geom_point(data = data, aes(x=Longitude, y=Latitude), 
+             colour = "red") +
+  geom_label_repel(
+    data = data,
+    aes(x = Longitude, y = Latitude, label = data$age_at_harvest),
+    box.padding = unit(0.5, "lines")) 
+
+ggsave("map.jpeg", width = 15, height = 15, units = "cm")

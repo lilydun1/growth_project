@@ -13,10 +13,10 @@ write.csv(df, "Growth_data.csv")
 growth_data %>% select(LMA, mean_ratio_leaf_stem)
 
 
-mod <- lm(log10(mean_g_gross_inv)~log10(age)*log10(wood_density), data = (growth_data %>% group_by(age, species) %>% 
+mod <- lm(log10(mean_g_height)~log10(wood_density)*log10(age), data = (growth_data %>% group_by(age, species) %>% 
                                                distinct(age, .keep_all = TRUE) %>% 
                                                  mutate(mean_g_gross_inv = mean_g_gross_inv*0.001)))
-
+summary(mod)
 #log10(wood_density)+log10(mean_leaf_m_whole)+log10(mean_P_area)+log10(mean_N_area)+log10(LMA)
 #going through each of the ages 
 
@@ -42,7 +42,7 @@ for(i in GR_types_all) {
 
 #interaction 
 for(i in GR_types_all) {
-  mod1 <- lm(formula = paste("log10(", i, ") ~ log10(age)*log10(LMA)", sep = ""),
+  mod1 <- lm(formula = paste("log10(", i, ") ~ log10(age)*(mean_leaf_m_whole)", sep = ""),
              data = (growth_data %>% 
                        filter(get(i) > -0.00001) %>% 
                        distinct(mean_ratio_leaf_stem, .keep_all = TRUE)))
@@ -75,12 +75,14 @@ ggpredict(mod, terms = c("LMA [all] ", "age")) %>%
   geom_point()
 
 
+R_types_all = c("mean_g_diameter", "mean_g_height", "mean_g_leaf_area", "mean_g_inv", "mean_g_gross_inv")
 
-
-mod <- lm(formula = log10(mean_g_diameter) ~ log10(age)* log10(wood_density),
+mod <- lm(formula = log10(mean_g_diameter) ~ log10(wood_density)+ (mean_leaf_m_whole),
    data = (growth_data %>% 
              filter(mean_g_diameter > -0.00001) %>% 
              distinct(mean_ratio_leaf_stem, .keep_all = TRUE)))
+
+summary(mod)
 
  ggplot(aes(log10(x), log10(predicted), colour = (group)), 
          data = ggpredict(mod, terms = c("wood_density [all]", "age"))) +

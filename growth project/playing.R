@@ -1,4 +1,4 @@
-pacman::p_load(tidyverse, ggeffects, ggpmisc, ggpubr, easystats, scales) 
+pacman::p_load(tidyverse, ggeffects, ggpmisc, ggpubr, easystats, scales, patchwork) 
 
 species_meta <- read_csv("data/species.csv")
 
@@ -59,38 +59,54 @@ growth_data <- all_data_growth %>%
 
 growth_data$age <- factor(growth_data$age, levels = c("1.4", "2.4", "5", "7", "9", "32"))
 
+growth_data %>% group_by(age) %>% summarise(mean(growth_stem_diameter))
 # plotting traits and diameter growth
 plotting_trait_growth <- function(data = growth_data, GR, response) {
-  ggplot(data = data, aes((.data[[response]]), (.data[[GR]]), col = age)) +
+  plot1 <- ggplot(data = data, aes((.data[[response]]), (.data[[GR]]), col = age)) +
     geom_point() + 
     geom_smooth(method = "lm", se = FALSE) +
-    #scale_x_log10() +
-    scale_y_log10() +
+    
     #stat_poly_eq(use_label(c("R2", "P", "n", "eq"))) +
     theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
           axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
           axis.text = element_text(size=12)) +
     labs(colour = "Age (yrs)") +
     scale_color_manual(values=c("#c35f5d", "#e5874d","#b3a034", "#12a388", "#81d0e2", "#8282b4"))
-}
+  
+   if (response == "mean_leaf_m_whole") {
+      plot2 <- plot1 + scale_y_log10() 
+    } else {
+      plot2 <- plot1 + scale_x_log10() + scale_y_log10() 
+    }
 
-growth_data %>% 
-  ggplot(aes(log10(mean_leaf_m_whole), log10(mean_g_diameter), col = age)) + 
-  geom_point() + 
-  geom_smooth(method = "lm", se = FALSE)
+if (GR == "mean_g_inv") {
+  plot2 + scale_y_log10(breaks = c(0.1, 1, 10, 100))}
+else { 
+  plot2}
+  
+}
 
 #for the correlations
 plotting_cors <- function(data = growth_data, GR, response, x_label) {
-  ggplot(data = data, aes((.data[[response]]), (.data[[GR]]))) +
+  
+  
+  plot1 <- ggplot(data = data, aes((.data[[response]]), (.data[[GR]]))) +
     geom_point() + 
     # geom_smooth(method = "lm") +
     stat_poly_eq(use_label(c("R2")), size = 5, label.x.npc = "left", label.y = "top") +
-    scale_x_log10() +
-    scale_y_log10() + # this one for LMF
+    scale_y_log10() +
     labs(x = x_label) +
     theme(text = element_text(size = 18), panel.background = element_blank(), 
           axis.line = element_line(colour = "black"), 
           axis.text = element_text(size = 12))
+  
+  if (response == "mean_g_inv") {
+    plot1 + scale_x_log10(breaks = c(1, 10, 100))
+  } else {
+    plot1 + scale_x_log10()
+  }
 }
+
+
 
 
