@@ -55,7 +55,9 @@ growth_data <- all_data_growth %>%
   inner_join(species_meta, by = c("species" = "Abbreviation")) %>% 
   dplyr::select(-c("Family", "Common_name", "Previous_names")) %>% 
   mutate(Species_name = str_replace(Species_name, "Leucopogon esquamatus", "Styphelia esquamata")) %>% 
-  arrange(Species_name)
+  arrange(Species_name) %>% 
+  ungroup() %>% 
+  mutate(LMA = LMA*10000)
 
 growth_data$age <- factor(growth_data$age, levels = c("1.4", "2.4", "5", "7", "9", "32"))
 

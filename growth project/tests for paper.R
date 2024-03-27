@@ -42,7 +42,7 @@ for(i in GR_types_all) {
 
 #interaction 
 for(i in GR_types_all) {
-  mod1 <- lm(formula = paste("log10(", i, ") ~ log10(age)*(mean_leaf_m_whole)", sep = ""),
+  mod1 <- lm(formula = paste("log10(", i, ") ~ log10(age)*log10(LMA)", sep = ""),
              data = (growth_data %>% 
                        filter(get(i) > -0.00001) %>% 
                        distinct(mean_ratio_leaf_stem, .keep_all = TRUE)))
@@ -55,7 +55,7 @@ mod <- lm(log(mean_g_diameter)~log(wood_density)*log(age), data = (growth_data %
 
 #interaction 
 for(i in GR_types_all) {
-  mod1 <- lm(formula = paste("log10(", i, ") ~ log10(mean_P_area)*(age)", sep = ""),
+  mod1 <- lm(formula = paste("log10(", i, ") ~ log10(LMA)*(age)", sep = ""),
              data = (growth_data %>% 
                        filter(get(i) > -0.00001) %>% 
                        distinct(mean_ratio_leaf_stem, .keep_all = TRUE)))
@@ -77,9 +77,9 @@ ggpredict(mod, terms = c("LMA [all] ", "age")) %>%
 
 R_types_all = c("mean_g_diameter", "mean_g_height", "mean_g_leaf_area", "mean_g_inv", "mean_g_gross_inv")
 
-mod <- lm(formula = log10(mean_g_diameter) ~ log10(wood_density)+ (mean_leaf_m_whole),
+mod <- lm(formula = log10(mean_g_gross_inv) ~ log10(wood_density)+ log10(LMA),
    data = (growth_data %>% 
-             filter(mean_g_diameter > -0.00001) %>% 
+             filter(mean_g_gross_inv > -0.00001) %>% 
              distinct(mean_ratio_leaf_stem, .keep_all = TRUE)))
 
 summary(mod)
