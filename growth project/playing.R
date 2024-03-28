@@ -20,11 +20,14 @@ nutrient_data_raw <- read_csv("nutrient_data.csv") %>%
 
 growth_data <- all_data_growth %>%  
   full_join(nutrient_data_raw) %>% 
+  mutate(LMA  = LMA*10000,
+         mean_P = mean_P/(10^6), 
+         mean_N = mean_N/100) %>% 
   mutate(ratio_leaf_stem = leaf_weight/stem_weight,
          leaf_m_whole = leaf_weight/total_weight, 
          leaf_a_whole = leaf_area/total_weight, 
-         mean_P_area = mean_P*leaf_size, 
-         mean_N_area = mean_N*leaf_size,
+         mean_P_area = mean_P*LMA, 
+         mean_N_area = mean_N*LMA,
          age_group = case_when(
            age < 2.5 ~ "Young (1.4, 2.4 yrs)",
            age > 2.5 ~ "Old (5, 7, 9, 32 yrs)")) %>% 
@@ -57,35 +60,28 @@ growth_data <- all_data_growth %>%
   mutate(Species_name = str_replace(Species_name, "Leucopogon esquamatus", "Styphelia esquamata")) %>% 
   arrange(Species_name) %>% 
   ungroup() %>% 
-  mutate(LMA = LMA*10000)
+  mutate(
+         mean_g_gross_inv = mean_g_gross_inv*0.001, 
+         mean_g_inv = mean_g_inv*0.001)
 
 growth_data$age <- factor(growth_data$age, levels = c("1.4", "2.4", "5", "7", "9", "32"))
 
-growth_data %>% group_by(age) %>% summarise(mean(growth_stem_diameter))
 # plotting traits and diameter growth
 plotting_trait_growth <- function(data = growth_data, GR, response) {
   plot1 <- ggplot(data = data, aes((.data[[response]]), (.data[[GR]]), col = age)) +
     geom_point() + 
     geom_smooth(method = "lm", se = FALSE) +
-    
     #stat_poly_eq(use_label(c("R2", "P", "n", "eq"))) +
     theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
           axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
           axis.text = element_text(size=12)) +
     labs(colour = "Age (yrs)") +
     scale_color_manual(values=c("#c35f5d", "#e5874d","#b3a034", "#12a388", "#81d0e2", "#8282b4"))
-  
    if (response == "mean_leaf_m_whole") {
       plot2 <- plot1 + scale_y_log10() 
     } else {
       plot2 <- plot1 + scale_x_log10() + scale_y_log10() 
     }
-
-if (GR == "mean_g_inv") {
-  plot2 + scale_y_log10(breaks = c(0.1, 1, 10, 100))}
-else { 
-  plot2}
-  
 }
 
 #for the correlations
@@ -101,7 +97,6 @@ plotting_cors <- function(data = growth_data, GR, response, x_label) {
     theme(text = element_text(size = 18), panel.background = element_blank(), 
           axis.line = element_line(colour = "black"), 
           axis.text = element_text(size = 12))
-  
   if (response == "mean_g_inv") {
     plot1 + scale_x_log10(breaks = c(1, 10, 100))
   } else {
@@ -109,6 +104,104 @@ plotting_cors <- function(data = growth_data, GR, response, x_label) {
   }
 }
 
+#model plots 
+plotting_predict <- function(data = growth_data, trait) {
+  
+  list_stats_inter <- list()
+  list_stats_no_inter <- list()
+  plot_stats_list <- list()
+  
+  for (i in GR_types_all) {
+    filtered_data = growth_data %>% 
+      filter(get(i) > -0.00001) %>% 
+      distinct(mean_ratio_leaf_stem, .keep_all = TRUE)
+    
+    if(trait == "mean_leaf_m_whole") {
+      list_stats_inter[[i]] <- lm(formula = paste("log10(", i , ") ~ log10(age)*(", trait, ")", sep = ""),
+                                  data = filtered_data)
+      
+      list_stats_no_inter[[i]] <- lm(formula = paste("log10(", i , ") ~ log10(age)+(", trait, ")", sep = ""),
+                                     data = filtered_data)
+    } else {
+      list_stats_inter[[i]] <- lm(formula = paste("log10(", i , ") ~ log10(age)*log10(", trait, ")", sep = ""),
+                                  data = filtered_data)
+      
+      list_stats_no_inter[[i]] <- lm(formula = paste("log10(", i , ") ~ log10(age)+log10(", trait, ")", sep = ""),
+                                     data = filtered_data)
+    }
+  }
+  
+  for (i in 1:5) {
+    data = growth_data %>% 
+      filter(get(GR_types_all[i]) > -0.00001) %>% 
+      distinct(mean_ratio_leaf_stem, .keep_all = TRUE)
+    
+    if (trait == "mean_leaf_m_whole") {
+      if (summary(list_stats_inter[[i]])$coefficients[4,4] < 0.05) {
+        plot_stats_list[[i]] <- 
+          ggplot(aes((x), (predicted), colour = (group)), 
+                 data = ggpredict(list_stats_inter[[i]], terms = c(paste(trait, "[all]"), "age"))) +
+          geom_line() +
+          scale_y_log10() +
+          geom_point(data = data, aes(x = (.data[[trait]]), y = (.data[[GR_types_all[i]]]), colour = as.factor(age))) +
+          labs(x = paste("(", trait, ")"), y = paste("log10(", GR_types_all[i], ")"), colour = "Age") +
+          theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+                axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+                axis.text = element_text(size=12)) +
+          labs(colour = "Age (yrs)") +
+          scale_color_manual(values=c("#c35f5d", "#e5874d","#b3a034", "#12a388", "#81d0e2", "#8282b4"))
+      } else {
+        plot_stats_list[[i]] <- 
+          ggplot(aes((x), (predicted), colour = (group)), 
+                 data = ggpredict(list_stats_no_inter[[i]], terms = c(paste(trait, "[all]"), "age"))) +
+          geom_line() +
+          scale_y_log10() +
+          geom_point(data = data, aes(x = (.data[[trait]]), y = (.data[[GR_types_all[i]]]), colour = as.factor(age))) +
+          labs(x = paste("(", trait, ")"), y = paste("log10(", GR_types_all[i], ")"), colour = "Age") +
+          theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+                axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+                axis.text = element_text(size=12)) +
+          labs(colour = "Age (yrs)") +
+          scale_color_manual(values=c("#c35f5d", "#e5874d","#b3a034", "#12a388", "#81d0e2", "#8282b4"))
+      } 
+    } 
+    
+    else {
+      if (summary(list_stats_inter[[i]])$coefficients[4,4] < 0.05) {
+        plot_stats_list[[i]] <- 
+          ggplot(aes((x), (predicted), colour = (group)), 
+                 data = ggpredict(list_stats_inter[[i]], terms = c(paste(trait, "[all]"), "age"))) +
+          geom_line() +
+          scale_x_log10() +
+          scale_y_log10() +
+          geom_point(data = data, aes(x = (.data[[trait]]), y = (.data[[GR_types_all[i]]]), colour = as.factor(age))) +
+          labs(x = paste("log10(", trait, ")"), y = paste("log10(", GR_types_all[i], ")"), colour = "Age") +
+          theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+                axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+                axis.text = element_text(size=12)) +
+          labs(colour = "Age (yrs)") +
+          scale_color_manual(values=c("#c35f5d", "#e5874d","#b3a034", "#12a388", "#81d0e2", "#8282b4"))
+      }
+      else {
+        plot_stats_list[[i]] <- 
+          ggplot(aes((x), (predicted), colour = (group)), 
+                 data = ggpredict(list_stats_no_inter[[i]], terms = c(paste(trait, "[all]"), "age"))) +
+          geom_line() +
+          scale_x_log10() +
+          scale_y_log10() +
+          geom_point(data = data, aes(x = (.data[[trait]]), y = (.data[[GR_types_all[i]]]), colour = as.factor(age))) +
+          labs(x = paste("log10(", trait, ")"), y = paste("log10(", GR_types_all[i], ")"), colour = "Age") +
+          theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+                axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+                axis.text = element_text(size=12)) +
+          labs(colour = "Age (yrs)") +
+          scale_color_manual(values=c("#c35f5d", "#e5874d","#b3a034", "#12a388", "#81d0e2", "#8282b4"))
+      }
+    }
+  }
+  
+  return(plot_stats_list)
+}
 
 
 

@@ -1,7 +1,7 @@
 #tests
 GR_types_all = c("mean_g_diameter", "mean_g_height", "mean_g_leaf_area", "mean_g_inv", "mean_g_gross_inv")
 traits = c("wood_density", "mean_leaf_m_whole", "mean_P_area", "mean_N_area", "LMA")
-ages <- c("1.4", "2.4","7", "5","9", "32")
+ages <- c("1.4", "2.4","7","9", "32")
 
 df <- growth_data %>% select(species, age, mean_leaf_m_whole) %>% group_by(age, species) %>% 
   distinct(age, .keep_all = TRUE) %>% ungroup() %>% group_by(age) %>% 
@@ -18,18 +18,26 @@ mod <- lm(log10(mean_g_height)~log10(wood_density)*log10(age), data = (growth_da
                                                  mutate(mean_g_gross_inv = mean_g_gross_inv*0.001)))
 summary(mod)
 #log10(wood_density)+log10(mean_leaf_m_whole)+log10(mean_P_area)+log10(mean_N_area)+log10(LMA)
+#c("mean_g_diameter", "mean_g_height", "mean_g_leaf_area", "mean_g_inv", "mean_g_gross_inv")
 #going through each of the ages 
 
-
 for(i in ages) {
-  mod <- lm(log10(mean_g_gross_inv)~log10(wood_density), 
+  mod <- lm(log10(mean_g_diameter)~log10(mean_N_area), 
             data = (growth_data %>% 
-                      #filter(mean_g_leaf_area > -0.00001) %>% 
+                      filter(mean_g_diameter > -0.00001) %>% 
                       filter(age == i) %>% 
                       group_by(age, species) %>% 
                       distinct(age, .keep_all = TRUE)))
   print(summary(mod))
 }
+
+df <- growth_data %>% 
+  group_by(age, species) %>% 
+  distinct(age, .keep_all = TRUE) %>% 
+  mutate(mean_g_gross_inv = (mean_g_gross_inv*0.001), 
+         mean_g_inv = (mean_g_inv*0.001)) %>% 
+  select(species, age, mean_g_diameter, mean_g_height, mean_g_leaf_area, mean_g_inv, mean_g_gross_inv, wood_density, mean_leaf_m_whole, mean_P_area, mean_N_area, LMA, mean_P, mean_N)
+write.csv(df, "Lily_growth_data.csv")
 
 #going through each of the growth rate types 
 for(i in GR_types_all) {
@@ -42,12 +50,13 @@ for(i in GR_types_all) {
 
 #interaction 
 for(i in GR_types_all) {
-  mod1 <- lm(formula = paste("log10(", i, ") ~ log10(age)*log10(LMA)", sep = ""),
+  mod1 <- lm(formula = paste("log10(", i, ") ~ log10(age)*log10(mean_N_area)", sep = ""),
              data = (growth_data %>% 
                        filter(get(i) > -0.00001) %>% 
                        distinct(mean_ratio_leaf_stem, .keep_all = TRUE)))
   print(summary(mod1))
 }
+
 
 mod <- lm(log(mean_g_diameter)~log(wood_density)*log(age), data = (growth_data %>% 
                                                                      filter(mean_g_diameter > -0.00001) %>% 
