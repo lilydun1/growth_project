@@ -25,17 +25,18 @@ work <- pls %>% group_by(dataset_id, taxon_name, trait_name, location_name) %>%
   filter(!is.na(leaf_mass_per_area)) %>% 
   filter(!is.na(wood_density))
 
-my limits()
-
 #this plot is gg
-wd_lma_austraits <- ggplot(data = (work), aes(log10(wood_density), log10(leaf_mass_per_area))) +
-  geom_point(aes(group = location_name, colour = location_name)) +
-  geom_smooth(aes(group = location_name, colour = location_name), se = FALSE, method = "lm") +
-  #geom_smooth(se = FALSE, size = 2) +
+wd_lma_austraits <- ggplot(data = (work), aes((wood_density), (leaf_mass_per_area))) +
+  geom_point(aes(group = location_name, colour = location_name), alpha = 0.2) +
+  geom_smooth(aes(group = location_name, colour = location_name), size = 0.62, se = FALSE, method = "lm") +
+  geom_smooth(se = FALSE, size = 2, colour = "black", method = "lm") +
   theme(legend.position="none") +
-  #geom_line(data =work, aes(log10(leaf_mass_per_area), log10(wood_density)))#+
-  stat_poly_eq(use_label(c("R2")), size = 6, hjust = -0.5)
-ggsave("wd_lma_austraits.jpeg", width = 25, height = 20, units = "cm")
+  stat_poly_eq(use_label(c("R2")), size = 6, hjust = -0.5) +
+  theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+        axis.text = element_text(size=12)) +
+  ylab(bquote(LMA~(g/m^2))) + xlab(bquote(WD~(g/cm^3)))+ scale_x_log10() + scale_y_log10() 
+ggsave("Fig S4. wd_lma_austraits.jpeg", width = 25, height = 20, units = "cm")
 
 
 ggplot(data = (work), aes(log10(leaf_mass_per_area), log10(wood_density))) +

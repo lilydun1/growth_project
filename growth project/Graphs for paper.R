@@ -436,4 +436,36 @@ map <- ggmap(basemap) +
 ggsave("map.jpeg", width = 15, height = 15, units = "cm")
 
 
+traits_growth_plots_P_mass <- map(GR_types_all, ~plotting_trait_growth(data = (growth_data %>%
+                                                                             group_by(age, species) %>% distinct(age, .keep_all = TRUE)),
+                                                                   response = "mean_P", GR = .x))
+traits_growth_plots_P_mass[[1]] <- traits_growth_plots_P_mass[[1]] + ylab(bquote(G[diam]~(mm/yr))) + xlab(bquote(P[mass]~(mg/g))) +
+  theme(axis.title.x = element_blank()) 
+traits_growth_plots_P_mass[[2]] <- traits_growth_plots_P_mass[[2]] + ylab(bquote(G[height]~(mm/yr))) + xlab(bquote(P[mass]~(mg/g))) +
+  theme(axis.title.x = element_blank()) 
+traits_growth_plots_P_mass[[3]] <- traits_growth_plots_P_mass[[3]] + ylab(bquote(G[area]~(mm^2/yr))) + xlab(bquote(P[mass]~(mg/g))) +
+  theme(axis.title.x = element_blank())
+traits_growth_plots_P_mass[[4]] <- traits_growth_plots_P_mass[[4]] + ylab(bquote(G[net]~(g/yr))) + xlab(bquote(P[mass]~(mg/g))) +
+  theme(axis.title.x = element_blank())
+traits_growth_plots_P_mass[[5]] <- traits_growth_plots_P_mass[[5]] + ylab(bquote(G[gross]~(g/yr))) + xlab(bquote(P[mass]~(mg/g))) 
+P_mass_paper <- ggarrange(plotlist = traits_growth_plots_P_mass, common.legend = TRUE, labels = c("a", "b", "c", "d", "e"), 
+                      font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"))
 
+traits_growth_plots_N_mass <- map(GR_types_all, ~plotting_trait_growth(data = (growth_data %>%
+                                                                              group_by(age, species) %>% distinct(age, .keep_all = TRUE)),
+                                                                    response = "mean_N", GR = .x))
+traits_growth_plots_N_mass[[1]] <- traits_growth_plots_N_mass[[1]] + ylab(bquote(G[diam]~(mm/yr))) + xlab(bquote(N[mass]~(mg/g))) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()) 
+traits_growth_plots_N_mass[[2]] <- traits_growth_plots_N_mass[[2]] + ylab(bquote(G[height]~(mm/yr))) + xlab(bquote(N[mass]~(mg/g))) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()) 
+traits_growth_plots_N_mass[[3]] <- traits_growth_plots_N_mass[[3]] + ylab(bquote(G[area]~(mm^2/yr))) + xlab(bquote(N[mass]~(mg/g))) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+traits_growth_plots_N_mass[[4]] <- traits_growth_plots_N_mass[[4]] + ylab(bquote(G[net]~(g/yr))) + xlab(bquote(N[mass]~(mg/g))) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()) 
+traits_growth_plots_N_mass[[5]] <- traits_growth_plots_N_mass[[5]] + ylab(bquote(G[gross]~(g/yr))) + xlab(bquote(N[mass]~(mg/g))) +
+  theme(axis.title.y = element_blank())
+N_mass_paper <- ggarrange(plotlist = traits_growth_plots_N_mass, common.legend = TRUE, labels = c("f", "g", "h", "i", "j"), 
+                          font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"))
+
+P_N_mass <- ggarrange(P_mass_paper, N_mass_paper)
+ggsave("Fig_S2_P_N_mass.jpeg", width = 23.91, height = 33.91, units = "cm")

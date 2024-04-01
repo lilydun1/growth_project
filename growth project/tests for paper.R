@@ -1,7 +1,7 @@
 #tests
 GR_types_all = c("mean_g_diameter", "mean_g_height", "mean_g_leaf_area", "mean_g_inv", "mean_g_gross_inv")
 traits = c("wood_density", "mean_leaf_m_whole", "mean_P_area", "mean_N_area", "LMA")
-ages <- c("1.4", "2.4","7","9", "32")
+ages <- c("1.4", "2.4", "5","7","9", "32")
 
 df <- growth_data %>% select(species, age, mean_leaf_m_whole) %>% group_by(age, species) %>% 
   distinct(age, .keep_all = TRUE) %>% ungroup() %>% group_by(age) %>% 
@@ -22,14 +22,22 @@ summary(mod)
 #going through each of the ages 
 
 for(i in ages) {
-  mod <- lm(log10(mean_g_diameter)~log10(mean_N_area), 
+  mod <- lm(log10(mean_g_gross_inv)~(mean_leaf_m_whole), 
             data = (growth_data %>% 
-                      filter(mean_g_diameter > -0.00001) %>% 
+                      filter(mean_g_gross_inv > -0.00001) %>% 
                       filter(age == i) %>% 
                       group_by(age, species) %>% 
                       distinct(age, .keep_all = TRUE)))
   print(summary(mod))
 }
+
+mod <- lm(log10(mean_g_gross_inv)~(mean_leaf_m_whole), 
+          data = (growth_data %>% 
+                    filter(mean_g_gross_inv > -0.00001) %>% 
+                    filter(age == 7) %>% 
+                    group_by(age, species) %>% 
+                    distinct(age, .keep_all = TRUE)))
+print(summary(mod))
 
 df <- growth_data %>% 
   group_by(age, species) %>% 
