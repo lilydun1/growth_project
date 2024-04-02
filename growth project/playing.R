@@ -52,6 +52,8 @@ growth_data <- all_data_growth %>%
          mean_g_gross_inv_s = mean(gross_inv, na.rm = TRUE), 
          mean_LMA_s = mean(LMA, na.rm = TRUE), 
          mean_ratio_leaf_stem_s = mean(ratio_leaf_stem, na.rm = TRUE), 
+         mean_P_s = mean(mean_P, na.rm = TRUE), 
+         mean_N_s = mean(mean_N, na.rm = TRUE), 
          mean_P_area_s = mean(mean_P_area, na.rm = TRUE), 
          mean_N_area_s = mean(mean_N_area, na.rm = TRUE)) %>% 
   ungroup() %>% 
@@ -92,7 +94,7 @@ plotting_cors <- function(data = growth_data, GR, response, x_label) {
     geom_point() + 
     # geom_smooth(method = "lm") +
     stat_poly_eq(use_label(c("R2")), size = 5, label.x.npc = "left", label.y = "top") +
-    scale_y_log10() +
+    #scale_y_log10() +
     labs(x = x_label) +
     theme(text = element_text(size = 18), panel.background = element_blank(), 
           axis.line = element_line(colour = "black"), 
@@ -101,7 +103,7 @@ plotting_cors <- function(data = growth_data, GR, response, x_label) {
     plot1 + scale_x_log10(breaks = c(1, 10, 100))
   } else {
     plot1 + scale_x_log10()
-  }
+  } 
 }
 
 #model plots 
