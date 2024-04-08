@@ -94,3 +94,34 @@ traits_cor <- map2(traits, c(bquote(Wood~density~(g/cm^3)), bquote(Leaf~mass~are
                      ylab(bquote(Leaf~P[area]~(units))))
 
 P_others <- ggarrange(plotlist = traits_cor, legend = "none", nrow=1, ncol = 4, labels = c("a", "b", "c", "d"))
+
+
+
+
+
+#Figure 3: The correlations of the traits at species level traits = c("wood_density", "mean_LMA_s","mean_P_area_s", "mean_N_area_s", "mean_leaf_m_whole_s")
+#c(bquote(WD~(g/cm^3)), bquote(LMA~(g/m^2)), bquote(P[area]~(g/m^2)), bquote(N[area]~(g/m^2)), bquote(LMF~(g/g)))
+
+traits <- c("wood_density")
+traits_cor <- map2(traits, c(bquote(WD~(g/cm^3))), 
+                   ~plotting_cors(data = (growth_data %>% 
+                                            group_by(age, species) %>% distinct(age, .keep_all = TRUE)),
+                                  response = .x, GR = "mean_LMA_s", x_label = .y) +
+                     ylab(bquote(LMA~(g/m^2))))
+
+#remember that the y axis of this one should not be logged
+leaf_whole_others <- ggarrange(plotlist = traits_cor, legend = "none", nrow=1, ncol = 4, labels = c("a", "b", "c", "d"), 
+                               font.label = list(size = 18))
+
+#remember this onwards need logging
+N_others <- ggarrange(plotlist = traits_cor, legend = "none", nrow=1, ncol = 4, labels = c("e", "f", "g"), 
+                      font.label = list(size = 18))
+
+P_others <- ggarrange(plotlist = traits_cor, legend = "none", nrow=1, ncol = 4, labels = c("h", "i"), 
+                      font.label = list(size = 18))
+
+LMA_others <- ggarrange(plotlist = traits_cor, legend = "none", nrow=1, ncol = 4, labels = c("j"), 
+                        font.label = list(size = 18))
+
+all_trait_cors <- ggarrange(leaf_whole_others, N_others, P_others, LMA_others, nrow = 4, align = "h")
+ggsave("trait_cors.jpeg", width = 33, height = 33, units = "cm")
