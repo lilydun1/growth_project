@@ -1,6 +1,6 @@
 GR_types_all = c("mean_g_diameter", "mean_g_height", "mean_g_leaf_area", "mean_g_inv", "mean_g_gross_inv")
 traits = c("wood_density", "mean_leaf_m_whole", "mean_P_area", "mean_N_area", "LMA")
-#figure 4: Wood density against all GRS
+#Wood density against all GRS
 traits_growth_plots_wd <- map(GR_types_all, ~plotting_trait_growth(data = (growth_data %>%
                                                                              group_by(age, species) %>% distinct(age, .keep_all = TRUE)),
                                                                   response = "wood_density", GR = .x))
@@ -14,9 +14,9 @@ traits_growth_plots_wd[[4]] <- traits_growth_plots_wd[[4]] + ylab(bquote(G[net]~
                               theme(axis.title.x = element_blank())
 traits_growth_plots_wd[[5]] <- traits_growth_plots_wd[[5]] + ylab(bquote(G[gross]~(g/yr))) + xlab(bquote(WD~(g/cm^3))) 
 wd_paper <- ggarrange(plotlist = traits_growth_plots_wd, common.legend = TRUE, labels = c("a", "b", "c", "d", "e"), 
-                      font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"), ) 
+                      font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"), vjust = 1) 
 
-#figure 4: LMA against all GRS
+#LMA against all GRS
 ### change the scales here 
 traits_growth_plots_lma <- map(GR_types_all, ~plotting_trait_growth(data = (growth_data %>%
                                                                               group_by(age, species) %>% distinct(age, .keep_all = TRUE)),
@@ -32,13 +32,13 @@ traits_growth_plots_lma[[4]] <- traits_growth_plots_lma[[4]] + ylab(bquote(G[net
 traits_growth_plots_lma[[5]] <- traits_growth_plots_lma[[5]] + ylab(bquote(G[gross]~(g/yr))) + xlab(bquote(LMA~(g/m^2))) +
   theme(axis.title.y = element_blank()) 
 lma_paper <- ggarrange(plotlist = traits_growth_plots_lma, common.legend = TRUE, labels = c("f", "g", "h", "i", "j"), 
-                       font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"), )
+                       font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"), hjust = 0.29, vjust = 1)
 
 #combining WD and LMA to one figure 
 LMA_WD <- ggarrange(wd_paper, lma_paper)
-ggsave("Fig_4_WD_LMA.jpeg", width = 23.91, height = 33.91, units = "cm")
+ggsave("Fig. 4_WD_LMA.jpeg", width = 23.91, height = 33.91, units = "cm")
 
-#figure leaf mass/ total mass 
+#leaf mass/ total mass 
 traits_growth_plots_lmf <- map(GR_types_all, ~plotting_trait_growth(data = (growth_data %>% 
                                                                                    group_by(age, species) %>% distinct(age, .keep_all = TRUE)),
                                                                          response = "mean_leaf_m_whole", GR = .x))
@@ -52,7 +52,7 @@ traits_growth_plots_lmf[[4]] <- traits_growth_plots_lmf[[4]] + ylab(bquote(G[net
   theme(axis.title.x = element_blank()) 
 traits_growth_plots_lmf[[5]] <- traits_growth_plots_lmf[[5]] + ylab(bquote(G[gross]~(g/yr))) + xlab(bquote(LMF~(g/g)))
 lmf_paper <- ggarrange(plotlist = traits_growth_plots_lmf, common.legend = TRUE, labels = c("a", "b", "c", "d", "e"), 
-                         font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"))
+                         font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"), vjust = 0.8)
 
 #Mean leaf P area against all GRs
 traits_growth_plots_P <- map(GR_types_all, ~plotting_trait_growth(data = (growth_data %>% 
@@ -69,7 +69,7 @@ traits_growth_plots_P[[4]] <- traits_growth_plots_P[[4]] + ylab(bquote(G[net]~(g
 traits_growth_plots_P[[5]] <- traits_growth_plots_P[[5]] + ylab(bquote(G[gross]~(g/yr))) + xlab(bquote(P[area]~(g/m^2))) +
   theme(axis.title.y = element_blank()) 
 P_paper <- ggarrange(plotlist = traits_growth_plots_P, common.legend = TRUE, labels = c("f", "g", "h", "i", "j"), 
-                          font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"))
+                          font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"), hjust = 0.29, vjust = 0.8)
 
 #Mean leaf N area against all GRs
 traits_growth_plots_N <- map(GR_types_all, ~plotting_trait_growth(data = (growth_data %>% 
@@ -86,13 +86,13 @@ traits_growth_plots_N[[4]] <- traits_growth_plots_N[[4]] + ylab(bquote(G[net]~(g
 traits_growth_plots_N[[5]] <- traits_growth_plots_N[[5]] + ylab(bquote(G[gross]~(g/yr))) + xlab(bquote(N[area]~(g/m^2))) +
   theme(axis.title.y = element_blank()) 
 N_paper <- ggarrange(plotlist = traits_growth_plots_N, common.legend = TRUE, labels = c("k", "l", "m", "n", "o"), 
-                          font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"))
+                          font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"), hjust = 0.29, vjust = 0.8)
 
 ggarrange(lmf_paper, P_paper, N_paper, ncol = 3)
 
-ggsave("figure_5_LMF_P_N.jpeg", width = 23.91, height = 33.91, units = "cm")
+ggsave("Fig 6 _LMF_P_N.jpeg", width = 23.91, height = 33.91, units = "cm")
 
-#Figure 3: The correlations of the traits at species level traits = c("wood_density", "mean_LMA_s","mean_P_area_s", "mean_N_area_s", "mean_leaf_m_whole_s")
+#The correlations of the traits at species level traits = c("wood_density", "mean_LMA_s","mean_P_area_s", "mean_N_area_s", "mean_leaf_m_whole_s")
 #c(bquote(WD~(g/cm^3)), bquote(LMA~(g/m^2)), bquote(P[area]~(g/m^2)), bquote(N[area]~(g/m^2)), bquote(LMF~(g/g)))
 
 traits <- c("wood_density")
@@ -117,7 +117,7 @@ LMA_others <- ggarrange(plotlist = traits_cor, legend = "none", nrow=1, ncol = 4
                         font.label = list(size = 18))
 
 all_trait_cors <- ggarrange(leaf_whole_others, N_others, P_others, LMA_others, nrow = 4, align = "h")
-ggsave("trait_cors.jpeg", width = 33, height = 33, units = "cm")
+ggsave("fig 5 trait_cors.jpeg", width = 33, height = 33, units = "cm")
 
 #GR correlations for species at age c("mean_g_gross_inv","mean_g_inv", "mean_g_leaf_area", "mean_g_height", "mean_g_diameter")
 #c(bquote(G[gross]~(g/yr)), bquote(G[net]~(g/yr)), bquote(G[area]~(mm^2/yr)), bquote(G[height]~(mm/yr)), bquoteG[diam]~(mm/yr)))
@@ -143,21 +143,9 @@ net_others <- ggarrange(plotlist = GR_cor_mean,legend = "none", nrow=1, ncol = 4
 
 GR_cor_mean_plots <- ggarrange(diam_others, height_others, la_others, net_others, nrow = 4,  align = "h")
 
-ggsave("GR_cor_mean_plots.jpeg", width = 33, height = 33, units = "cm")
+ggsave("Fig 1 GR_cor_mean_plots.jpeg", width = 33, height = 33, units = "cm")
 
 # trait against age logging the trait 
-#WD_age <- growth_data %>% 
-  #filter(age %in% c(7,9, 32)) %>% 
-  #group_by(age, species) %>% distinct(age, .keep_all = TRUE) %>% 
-  #ggplot(aes((age), (wood_density))) + geom_point() + 
-    #ylab(bquote(WD~(g/cm^3))) + 
-    #xlab(bquote(Age~(yrs))) +
-    #scale_x_log10() +
-    #scale_y_log10() +
-    #theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
-        #axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
-        #axis.text = element_text(size=12), legend.position="none")
-
 LMA_age <- growth_data %>% 
   group_by(age, species) %>% 
   distinct(age, .keep_all = TRUE) %>% 
@@ -236,10 +224,8 @@ trait_age_legend <- ggplot(growth_data, aes(x = age, y = mean_N_area, color = Sp
   labs(colour = "Species") + 
   guides(color = guide_legend(nrow = 7))
 
-
 traits_age <- ggarrange(LMA_age, leaf_whole_age, trait_age_legend, P_age, N_age, labels = c("a", "b", "","c", "d"), font.label = list(size = 18))
-ggsave("traits_age.jpeg", width = 36, height = 25.3, units = "cm")
-
+ggsave("Fig 3 traits_age.jpeg", width = 36, height = 25.3, units = "cm")
 
 #GRs against age logged
 diam_age <- growth_data %>% 
@@ -323,7 +309,7 @@ gross_inv_age <- growth_data %>%
         axis.text = element_text(size=12), legend.position="none")
 
 GR_age <- ggarrange(diam_age, height_age, la_age, inv_age, gross_inv_age, trait_age_legend, labels = c("a", "b", "c", "d", "e"), font.label = list(size = 18))
-ggsave("GR_age.jpeg", width = 36, height = 25.3, units = "cm")
+ggsave("Fig 2 GR_age.jpeg", width = 36, height = 25.3, units = "cm")
 
 
 #Plotting the prediction of the model with the raw data points 
@@ -409,13 +395,13 @@ P_model <- ggarrange(plotlist = result_plots[[3]], labels = c("f", "g", "h", "i"
 N_model <- ggarrange(plotlist = result_plots[[4]], labels = c("k", "l", "m", "n", "o"), 
                      font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"), common.legend = T)
 LMA_model <- ggarrange(plotlist = result_plots[[5]], labels = c("f", "g", "h", "i", "j"), 
-                       font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"), common.legend = T)
+                       font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"), common.legend = T, hjust = 0.29, vjust = 1)
 
 ggarrange(WD_model, LMA_model)
-ggsave("Fig S2. model_WD_LMF.jpeg", width = 23.91, height = 33.91, units = "cm")
+ggsave("Fig S4 model_WD_LMA.jpeg", width = 23.91, height = 33.91, units = "cm")
 
 ggarrange(LMF_model, P_model, N_model, ncol = 3, nrow = 1)
-ggsave("Fig S3. model_LMA_P_N.jpeg", width = 23.91, height = 33.91, units = "cm")
+ggsave("Fig S5 model_LMF_P_N.jpeg", width = 23.91, height = 33.91, units = "cm")
 
 #making site map
 basemap <- get_map('Kuringai National Park', zoom = 12, maptype = "satellite")
@@ -433,9 +419,9 @@ map <- ggmap(basemap) +
     aes(x = Longitude, y = Latitude, label = data$age_at_harvest),
     box.padding = unit(0.5, "lines")) 
 
-ggsave("map.jpeg", width = 15, height = 15, units = "cm")
+ggsave("Fig S1 map.jpeg", width = 15, height = 15, units = "cm")
 
-
+#doing P and N as mass
 traits_growth_plots_P_mass <- map(GR_types_all, ~plotting_trait_growth(data = (growth_data %>%
                                                                              group_by(age, species) %>% distinct(age, .keep_all = TRUE)),
                                                                    response = "mean_P", GR = .x))
@@ -449,7 +435,7 @@ traits_growth_plots_P_mass[[4]] <- traits_growth_plots_P_mass[[4]] + ylab(bquote
   theme(axis.title.x = element_blank())
 traits_growth_plots_P_mass[[5]] <- traits_growth_plots_P_mass[[5]] + ylab(bquote(G[gross]~(g/yr))) + xlab(bquote(P[mass]~(mg/g))) 
 P_mass_paper <- ggarrange(plotlist = traits_growth_plots_P_mass, common.legend = TRUE, labels = c("a", "b", "c", "d", "e"), 
-                      font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"))
+                      font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"), vjust = 1)
 
 traits_growth_plots_N_mass <- map(GR_types_all, ~plotting_trait_growth(data = (growth_data %>%
                                                                               group_by(age, species) %>% distinct(age, .keep_all = TRUE)),
@@ -465,12 +451,12 @@ traits_growth_plots_N_mass[[4]] <- traits_growth_plots_N_mass[[4]] + ylab(bquote
 traits_growth_plots_N_mass[[5]] <- traits_growth_plots_N_mass[[5]] + ylab(bquote(G[gross]~(g/yr))) + xlab(bquote(N[mass]~(mg/g))) +
   theme(axis.title.y = element_blank())
 N_mass_paper <- ggarrange(plotlist = traits_growth_plots_N_mass, common.legend = TRUE, labels = c("f", "g", "h", "i", "j"), 
-                          font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"))
+                          font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"), hjust = 0.29, vjust = 1)
 
 P_N_mass <- ggarrange(P_mass_paper, N_mass_paper)
-ggsave("Fig_S2_P_N_mass.jpeg", width = 23.91, height = 33.91, units = "cm")
+ggsave("Fig S2 P_N_mass.jpeg", width = 30, height = 33.91, units = "cm")
 
-# he correlations of the traits at species level traits = c("wood_density", "mean_LMA_s","mean_P_s", "mean_N_s", "mean_leaf_m_whole_s")
+#mass : The correlations of the traits at species level traits = c("wood_density", "mean_LMA_s","mean_P_s", "mean_N_s", "mean_leaf_m_whole_s")
 #c(bquote(WD~(g/cm^3)), bquote(LMA~(g/m^2)), bquote(P[mass]~(mg/g)), bquote(N[mass]~(g/g)), bquote(LMF~(g/g)))
 
 traits_mass <- c("wood_density", "mean_LMA_s","mean_P_s", "mean_N_s")
@@ -495,4 +481,4 @@ LMA_others_mass <- ggarrange(plotlist = traits_cor_mass, legend = "none", nrow=1
                              font.label = list(size = 18))
 
 all_trait_cor_mass <- ggarrange(leaf_whole_others_mass, N_others_mass, P_others_mass, LMA_others_mass, nrow = 4, align = "h")
-ggsave("trait_cors_mass.jpeg", width = 33, height = 33, units = "cm")
+ggsave("Fig S3 trait_cors_mass.jpeg", width = 33, height = 33, units = "cm")
