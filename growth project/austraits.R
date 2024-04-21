@@ -23,7 +23,18 @@ work <- pls %>% group_by(dataset_id, taxon_name, trait_name, location_name) %>%
   select(dataset_id, taxon_name, trait_name, value, location_name) %>% 
   pivot_wider(names_from = trait_name, values_from = value) %>% 
   filter(!is.na(leaf_mass_per_area)) %>% 
-  filter(!is.na(wood_density))
+  filter(!is.na(wood_density)) %>% 
+  filter(!is.na(location_name)) %>% 
+  group_by(location_name) %>% 
+  mutate(taxon_count = n_distinct(taxon_name)) %>% 
+  ungroup() %>% 
+  mutate(leaf_mass_per_area = log10(leaf_mass_per_area), 
+         wood_density = log10(wood_density)) %>% 
+  filter(taxon_count > 2) %>% 
+  group_by(location_name) %>% 
+  mutate(r = cor(leaf_mass_per_area, wood_density),
+         model_summary = list(tidy(lm(leaf_mass_per_area ~ wood_density)))) 
+
 
 #this plot is gg
 wd_lma_austraits <- ggplot(data = (work), aes((wood_density), (leaf_mass_per_area))) +
@@ -38,6 +49,8 @@ wd_lma_austraits <- ggplot(data = (work), aes((wood_density), (leaf_mass_per_are
   ylab(bquote(LMA~(g/m^2))) + xlab(bquote(WD~(g/cm^3)))+ scale_x_log10() + scale_y_log10() 
 ggsave("Fig S4. wd_lma_austraits.jpeg", width = 25, height = 20, units = "cm")
 
+work %>% distinct(location_name, .keep_all = T) %>% 
+  ggplot(aes(taxon_count, r)) + geom_point()
 
 ggplot(data = (work), aes(log10(leaf_mass_per_area), log10(wood_density))) +
   geom_line(aes(group = location_name, colour = location_name)) +
