@@ -16,25 +16,24 @@ data_LMA <- data_LMA %>% join_locations()
 
 pls <- data_LMA$traits %>% ungroup() %>% full_join(data_wood_dens$traits)
 
-work <- pls %>% group_by(dataset_id, taxon_name, trait_name, location_name) %>% 
-  mutate(value = mean(value)) %>% 
-  distinct(value, .keep_all = TRUE) %>% 
-  ungroup() %>% 
-  select(dataset_id, taxon_name, trait_name, value, location_name) %>% 
-  pivot_wider(names_from = trait_name, values_from = value) %>% 
-  filter(!is.na(leaf_mass_per_area)) %>% 
-  filter(!is.na(wood_density)) %>% 
-  filter(!is.na(location_name)) %>% 
-  group_by(location_name) %>% 
-  mutate(taxon_count = n_distinct(taxon_name)) %>% 
-  ungroup() %>% 
-  mutate(leaf_mass_per_area = log10(leaf_mass_per_area), 
-         wood_density = log10(wood_density)) %>% 
-  filter(taxon_count > 2) %>% 
-  group_by(location_name) %>% 
-  mutate(r = cor(leaf_mass_per_area, wood_density),
-         model_summary = list(tidy(lm(leaf_mass_per_area ~ wood_density)))) 
-
+work <- pls %>%
+  group_by(dataset_id, taxon_name, trait_name, location_name) %>%
+  summarise(value = mean(value, na.rm = TRUE), .groups = 'drop') %>%
+  distinct(value, .keep_all = TRUE) %>%
+  pivot_wider(names_from = trait_name, values_from = value) %>%
+  filter(!is.na(leaf_mass_per_area) & !is.na(wood_density) & !is.na(location_name)) %>%
+  group_by(location_name) %>%
+  mutate(
+    taxon_count = n_distinct(taxon_name),
+    leaf_mass_per_area = log10(leaf_mass_per_area),
+    wood_density = log10(wood_density)
+  ) %>%
+  filter(taxon_count > 2) %>%
+  mutate(
+    r = cor(leaf_mass_per_area, wood_density),
+    model_summary = list(tidy(lm(leaf_mass_per_area ~ wood_density)))
+  ) %>%
+  ungroup()
 
 #this plot is gg
 wd_lma_austraits <- ggplot(data = (work), aes((wood_density), (leaf_mass_per_area))) +
