@@ -22,24 +22,23 @@ work <- pls %>%
   distinct(value, .keep_all = TRUE) %>%
   pivot_wider(names_from = trait_name, values_from = value) %>%
   filter(!is.na(leaf_mass_per_area) & !is.na(wood_density) & !is.na(location_name)) %>%
+  filter(taxon_count > 3) %>%
   group_by(location_name) %>%
   mutate(
     taxon_count = n_distinct(taxon_name),
     leaf_mass_per_area = log10(leaf_mass_per_area),
-    wood_density = log10(wood_density)
-  ) %>%
+    wood_density = log10(wood_density)) %>%
   filter(taxon_count > 2) %>%
   mutate(
     r = cor(leaf_mass_per_area, wood_density),
-    model_summary = list(tidy(lm(leaf_mass_per_area ~ wood_density)))
-  ) %>%
+    model_summary = list(tidy(lm(leaf_mass_per_area ~ wood_density)))) %>%
   ungroup()
 
 #this plot is gg
 wd_lma_austraits <- ggplot(data = (work), aes((wood_density), (leaf_mass_per_area))) +
   geom_point(aes(group = location_name, colour = location_name), alpha = 0.2) +
-  geom_smooth(aes(group = location_name, colour = location_name), size = 0.62, se = FALSE, method = "lm") +
-  geom_smooth(se = FALSE, size = 2, colour = "black", method = "lm") +
+  geom_smooth(aes(group = location_name, colour = location_name), linewidth = 0.62, se = FALSE, method = "lm") +
+  geom_smooth(se = FALSE, linewidth = 2, colour = "black", method = "lm") +
   theme(legend.position="none") +
   stat_poly_eq(use_label(c("R2")), size = 6, hjust = -0.5) +
   theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 

@@ -1,4 +1,4 @@
-pacman::p_load(tidyverse, ggeffects, ggpmisc, ggpubr, easystats, scales, patchwork) 
+pacman::p_load(tidyverse, ggeffects, ggpmisc, ggpubr, easystats, scales, patchwork, broom) 
 
 species_meta <- read_csv("data/species.csv")
 
