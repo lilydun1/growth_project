@@ -62,10 +62,11 @@ funnel_plot <- work %>%
   geom_point() +
   scale_colour_manual(values = c("our_study" = "red", "other" = "black")) +
   theme(text = element_text(size = 18), legend.position = "none", 
-  panel.background = element_blank(), axis.line = element_line(colour = "black"), 
-  legend.key = element_rect(fill = "white"), axis.text = element_text(size = 12)) +
+        panel.background = element_blank(), axis.line = element_line(colour = "black"), 
+        legend.key = element_rect(fill = "white"), axis.text = element_text(size = 12)) +
   ylab("Correlation of WD and LMA") + xlab("Number of species sampled") 
 
 austraits_fig <- ggarrange(wd_lma_austraits, funnel_plot, ncol = 1, nrow = 2, align = c("v"), labels = c("a", "b"), font.label = list(size = 18))
-ggsave("Fig S6. wd_lma_austraits.jpeg", width = 20, height = 25, units = "cm", )
+ggsave("Fig S6. wd_lma_austraits.jpeg", width = 20, height = 25, units = "cm")
+
 

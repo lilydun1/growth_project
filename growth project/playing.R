@@ -115,8 +115,10 @@ plotting_predict <- function(data = growth_data, trait) {
   
   for (i in GR_types_all) {
     filtered_data = growth_data %>% 
-      filter(get(i) > -0.00001) %>% 
-      distinct(mean_ratio_leaf_stem, .keep_all = TRUE)
+      filter(get(i) > -0.00001) %>%
+      group_by(age, species) %>% 
+      distinct(age, .keep_all = TRUE) %>% 
+      ungroup()
     
     if(trait == "mean_leaf_m_whole") {
       list_stats_inter[[i]] <- lm(formula = paste("log10(", i , ") ~ log10(age)*(", trait, ")", sep = ""),
