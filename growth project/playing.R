@@ -86,15 +86,34 @@ plotting_trait_growth <- function(data = growth_data, GR, response) {
     }
 }
 
-#for the correlations
-plotting_cors <- function(data = growth_data, GR, response, x_label) {
+#for the correlations of trait
+plotting_cors_trait <- function(data = growth_data, GR, response, x_label) {
   
   
   plot1 <- ggplot(data = data, aes((.data[[response]]), (.data[[GR]]))) +
     geom_point() + 
-    # geom_smooth(method = "lm") +
     stat_poly_eq(use_label(c("R2")), size = 5, label.x.npc = "left", label.y = "top") +
-    #scale_y_log10() +
+    scale_x_log10() +
+    labs(x = x_label) +
+    theme(text = element_text(size = 18), panel.background = element_blank(), 
+          axis.line = element_line(colour = "black"), 
+          axis.text = element_text(size = 12))
+  if (GR == "mean_leaf_m_whole_s") {
+    plot1 
+  } else {
+    plot1 + scale_y_log10()
+  } 
+}
+
+
+#for the correlations of Growth rates
+plotting_cors_GR <- function(data = growth_data, GR, response, x_label) {
+  
+  
+  plot1 <- ggplot(data = data, aes((.data[[response]]), (.data[[GR]]))) +
+    geom_point() + 
+    stat_poly_eq(use_label(c("R2")), size = 5, label.x.npc = "left", label.y = "top") +
+    scale_y_log10() +
     labs(x = x_label) +
     theme(text = element_text(size = 18), panel.background = element_blank(), 
           axis.line = element_line(colour = "black"), 

@@ -3,19 +3,11 @@ GR_types_all = c("mean_g_diameter", "mean_g_height", "mean_g_leaf_area", "mean_g
 traits = c("wood_density", "mean_leaf_m_whole", "mean_P_area", "mean_N_area", "LMA")
 ages <- c("1.4", "2.4","7","9", "32")
 
-df <- growth_data %>% select(species, age, mean_leaf_m_whole) %>% group_by(age, species) %>% 
-  distinct(age, .keep_all = TRUE) %>% ungroup() %>% group_by(age) %>% 
-  mutate(mean = (mean(mean_leaf_m_whole))) %>% 
-  mutate(max_gross = (max(mean_g_gross_inv*0.001)))
 
-write.csv(df, "Growth_data.csv")
-
-growth_data %>% select(LMA, mean_ratio_leaf_stem)
-
-
-mod <- lm(log10(mean_g_height)~log10(wood_density)*log10(age), data = (growth_data %>% group_by(age, species) %>% 
+mod <- lm(log10(mean_g_height)~log10(mean_N_area)*log10(age), data = (growth_data %>% group_by(age, species) %>% 
                                                distinct(age, .keep_all = TRUE) %>% 
-                                                 mutate(mean_g_gross_inv = mean_g_gross_inv*0.001)))
+                                                 mutate(mean_g_gross_inv = mean_g_gross_inv*0.001) %>% 
+                                                filter(mean_g_height > -0.00001)))
 summary(mod)
 #log10(wood_density)+log10(mean_leaf_m_whole)+log10(mean_P_area)+log10(mean_N_area)+log10(LMA)
 #c("mean_g_diameter", "mean_g_height", "mean_g_leaf_area", "mean_g_inv", "mean_g_gross_inv")
