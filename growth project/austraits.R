@@ -39,7 +39,7 @@ wd_lma_austraits <- ggplot(data = work, aes(x = wood_density, y = leaf_mass_per_
               linewidth = 0.3, se = FALSE, method = "lm") +
   geom_smooth(se = FALSE, linewidth = 1, colour = "black", method = "lm") +
   theme(legend.position="none") +
-  scale_color_manual(values = c("Positive" = "seagreen", "Negative" = "red")) +
+  scale_color_manual(values = c("Positive" = "cadetblue", "Negative" = "maroon2")) +
   theme(text = element_text(size = 18), legend.text = element_text(size = 18), 
         panel.background = element_blank(), axis.line = element_line(colour = "black"), 
         legend.key = element_rect(fill = "white"), axis.text = element_text(size = 12)) +

@@ -89,7 +89,7 @@ N_paper <- ggarrange(plotlist = traits_growth_plots_N, common.legend = TRUE, lab
                           font.label = list(size = 18), ncol = 1, nrow = 5, align = c("v"), hjust = 0.29, vjust = 0.8)
 
 ggarrange(lmf_paper, P_paper, N_paper, ncol = 3)
-ggsave("Fig 6 _LMF_P_N.jpeg", width = 23.91, height = 33.91, units = "cm")
+ggsave("Fig 6 LMF_P_N.jpeg", width = 23.91, height = 33.91, units = "cm")
 
 #The correlations of the traits at species level traits = c("wood_density", "mean_LMA_s","mean_P_area_s", "mean_N_area_s", "mean_leaf_m_whole_s")
 #c(bquote(WD~(g/cm^3)), bquote(LMA~(g/m^2)), bquote(P[area]~(g/m^2)), bquote(N[area]~(g/m^2)), bquote(LMF~(g/g)))
@@ -114,17 +114,17 @@ LMA_others <- ggarrange(plotlist = traits_cor, legend = "none", nrow=1, ncol = 4
                         font.label = list(size = 18))
 
 all_trait_cors <- ggarrange(leaf_whole_others, N_others, P_others, LMA_others, nrow = 4, align = "h")
-ggsave("fig 5 trait_cors.jpeg", width = 33, height = 33, units = "cm")
+ggsave("Fig 5 trait_cors.jpeg", width = 33, height = 33, units = "cm")
 
 #GR correlations for species at age c("mean_g_gross_inv","mean_g_inv", "mean_g_leaf_area", "mean_g_height", "mean_g_diameter")
 #c(bquote(G[total]~(g/yr)), bquote(G[net]~(g/yr)), bquote(G[area]~(mm^2/yr)), bquote(G[height]~(mm/yr)), bquote(G[diam]~(mm/yr)))
 
-GR_types_mean = c("mean_g_inv")
-GR_cor_mean <- map2(GR_types_mean, c(bquote(G[net]~(g/yr))), 
+GR_types_mean <- c("mean_g_gross_inv","mean_g_inv", "mean_g_leaf_area", "mean_g_height")
+GR_cor_mean <- map2(GR_types_mean, c(bquote(G[total]~(g/yr)), bquote(G[net]~(g/yr)), bquote(G[area]~(mm^2/yr)), bquote(G[height]~(mm/yr))), 
                     ~plotting_cors_GR(data = (growth_data %>% 
                                              group_by(age, species) %>% distinct(age, .keep_all = TRUE)),
-                     response = .x, GR = "mean_g_leaf_area", x_label = .y) +
-                     ylab(bquote(G[area]~(mm^2/yr))))
+                     response = .x, GR = "mean_g_diameter", x_label = .y) +
+                     ylabbquote(G[diam]~(mm/yr)))
 
 diam_others <- ggarrange(plotlist = GR_cor_mean, legend = "none", nrow=1, ncol = 4, labels = c("a", "b", "c", "d"), 
                               font.label = list(size = 18))
@@ -161,6 +161,7 @@ LMA_age <- growth_data %>%
           axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
           axis.text = element_text(size=12), axis.title.x = element_text(colour="white"), legend.position="none") 
 
+#not logging LMF
 leaf_whole_age <- growth_data %>% 
   group_by(age, species) %>% 
   distinct(age, .keep_all = TRUE) %>% 

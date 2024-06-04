@@ -105,7 +105,6 @@ plotting_cors_trait <- function(data = growth_data, GR, response, x_label) {
   } 
 }
 
-
 #for the correlations of Growth rates
 plotting_cors_GR <- function(data = growth_data, GR, response, x_label) {
   
@@ -125,7 +124,7 @@ plotting_cors_GR <- function(data = growth_data, GR, response, x_label) {
   } 
 }
 
-#model plots 
+#model plots for S4 and S5 
 plotting_predict <- function(data = growth_data, trait) {
   
   list_stats_inter <- list()
