@@ -171,7 +171,8 @@ plotting_predict <- function(data = growth_data, trait) {
                 axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
                 axis.text = element_text(size=12)) +
           labs(colour = "Age (yrs)") +
-          scale_color_manual(values=c("#c35f5d", "#e5874d","#b3a034", "#12a388", "#81d0e2", "#8282b4"))
+          scale_color_manual(values=c("#c35f5d", "#e5874d","#b3a034", "#12a388", "#81d0e2", "#8282b4"),
+                             breaks = c("1.4", "2.4", "5", "7", "9", "32"))
       } else {
         plot_stats_list[[i]] <- 
           ggplot(aes((x), (predicted), colour = (group)), 
@@ -184,7 +185,8 @@ plotting_predict <- function(data = growth_data, trait) {
                 axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
                 axis.text = element_text(size=12)) +
           labs(colour = "Age (yrs)") +
-          scale_color_manual(values=c("#c35f5d", "#e5874d","#b3a034", "#12a388", "#81d0e2", "#8282b4"))
+          scale_color_manual(values=c("#c35f5d", "#e5874d","#b3a034", "#12a388", "#81d0e2", "#8282b4"),
+                             breaks = c("1.4", "2.4", "5", "7", "9", "32"))
       } 
     } 
     
@@ -202,7 +204,8 @@ plotting_predict <- function(data = growth_data, trait) {
                 axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
                 axis.text = element_text(size=12)) +
           labs(colour = "Age (yrs)") +
-          scale_color_manual(values=c("#c35f5d", "#e5874d","#b3a034", "#12a388", "#81d0e2", "#8282b4"))
+          scale_color_manual(values=c("#c35f5d", "#e5874d","#b3a034", "#12a388", "#81d0e2", "#8282b4"),
+                             breaks = c("1.4", "2.4", "5", "7", "9", "32"))
       }
       else {
         plot_stats_list[[i]] <- 
@@ -217,13 +220,13 @@ plotting_predict <- function(data = growth_data, trait) {
                 axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
                 axis.text = element_text(size=12)) +
           labs(colour = "Age (yrs)") +
-          scale_color_manual(values=c("#c35f5d", "#e5874d","#b3a034", "#12a388", "#81d0e2", "#8282b4"))
+          scale_color_manual(values=c("#c35f5d", "#e5874d","#b3a034", "#12a388", "#81d0e2", "#8282b4"),
+                             breaks = c("1.4", "2.4", "5", "7", "9", "32"))
       }
     }
   }
   
   return(plot_stats_list)
 }
-
 
 
