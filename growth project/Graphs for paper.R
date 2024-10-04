@@ -482,3 +482,86 @@ LMA_others_mass <- ggarrange(plotlist = traits_cor_mass, legend = "none", nrow=1
 
 all_trait_cor_mass <- ggarrange(leaf_whole_others_mass, N_others_mass, P_others_mass, LMA_others_mass, nrow = 4, align = "h")
 ggsave("Fig S3 trait_cors_mass.jpeg", width = 33, height = 33, units = "cm")
+
+
+LMA_height <- growth_data %>% 
+  group_by(age, species) %>% 
+  distinct(age, .keep_all = TRUE) %>% 
+  ggplot(aes(height, LMA)) + 
+  geom_smooth(method = 'lm', color = "black") + 
+  ylab(bquote(LMA~(g/m^2))) + 
+  #xlab(bquote(Age~(yrs))) +
+  scale_x_log10() +
+  scale_y_log10() +
+  geom_point(aes((height), (LMA), col = Species_name), alpha = 0.2) +
+  geom_line(aes((height), (LMA), col = Species_name), alpha = 0.2, size = 0.8) +
+  #stat_poly_eq(use_label(c("eq", "R2", "P"))) +
+  stat_poly_eq(use_label(c("eq", "R2", "P")), size = 5, label.x.npc = "right", label.y = "top") +
+  theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+        axis.text = element_text(size=12), axis.title.x = element_text(colour="white"), legend.position="none") 
+
+leaf_whole_height <- growth_data %>% 
+  group_by(age, species) %>% 
+  distinct(age, .keep_all = TRUE) %>% 
+  ggplot(aes(height, mean_leaf_m_whole)) + 
+  geom_smooth(method = 'lm', color = "black") + 
+  ylab(bquote(LMF~(g/g))) + 
+  #xlab(bquote(Age~(yrs))) +
+  scale_x_log10() +
+  geom_point(aes((height), (mean_leaf_m_whole), col = Species_name),  alpha = 0.2) +
+  geom_line(aes((height), (mean_leaf_m_whole), col = Species_name), alpha = 0.2, size = 0.8) +
+  stat_poly_eq(use_label(c("eq","R2", "P")), size = 5, label.x.npc = "right", label.y = "top") +
+  theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+        axis.text = element_text(size=12), axis.title.x = element_text(colour="white"), legend.position="none")
+
+P_height <- growth_data %>% 
+  filter(age != 5) %>% 
+  group_by(age, species) %>% 
+  distinct(age, .keep_all = TRUE) %>% 
+  ggplot(aes(height, mean_P_area)) + 
+  #geom_smooth(method = 'lm', color = "black") + 
+  ylab(bquote(P[area]~(g/m^2))) + 
+  #xlab(bquote(A~(yrs))) +
+  scale_x_log10() +
+  scale_y_log10() +
+  geom_point(aes((height), (mean_P_area), col = species),  alpha = 0.2) +
+  geom_line(aes((height), (mean_P_area), col = species), alpha = 0.2, size = 0.8) +
+  stat_poly_eq(use_label(c("P")), size = 5, ) +
+  theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+        axis.text = element_text(size=12), legend.position="none")
+
+N_height <- growth_data %>% 
+  filter(age != 5) %>% 
+  group_by(age, species) %>% 
+  distinct(age, .keep_all = TRUE) %>% 
+  ungroup() %>% 
+  ggplot(aes(height, mean_N_area)) +
+  geom_smooth(method = 'lm', color = "black") + 
+  ylab(bquote(N[area]~(g/m^2))) + 
+  #xlab(bquote(Age~(yrs))) +
+  scale_x_log10() +
+  scale_y_log10() +
+  geom_point(aes((height), (mean_N_area), col = species),  alpha = 0.2) +
+  geom_line(aes((height), (mean_N_area), col = species), alpha = 0.2, size = 0.8) +
+  stat_poly_eq(use_label(c("eq","R2", "P")), size = 5, label.x.npc = "right", label.y = "top") +
+  theme(text = element_text(size = 18),legend.text=element_text(size=18), panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), legend.key=element_rect(fill="white"), 
+        axis.text = element_text(size=12), legend.position="none")
+
+trait_height_legend <- ggplot(growth_data, aes(x = height, y = mean_N_area, color = Species_name))+
+  geom_point(alpha = 0.2)+
+  geom_line(alpha = 0.2, size = 0.8) +
+  lims(x = c(0,0), y = c(0,0))+
+  theme_void()+
+  theme(legend.position = c(0.5,0.5),
+        legend.key.size = unit(1, "cm"),
+        legend.text = element_text(size =  12, face = "italic"),
+        legend.title = element_text(size = 18)) +
+  labs(colour = "Species") + 
+  guides(color = guide_legend(nrow = 7))
+
+traits_height <- ggarrange(LMA_height, leaf_whole_height, trait_height_legend, P_height, N_height, labels = c("a", "b", "","c", "d"), font.label = list(size = 18))
+ggsave("traits_height.jpeg", width = 36, height = 25.3, units = "cm")
