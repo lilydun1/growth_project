@@ -490,7 +490,7 @@ LMA_height <- growth_data %>%
   ggplot(aes(height, LMA)) + 
   geom_smooth(method = 'lm', color = "black") + 
   ylab(bquote(LMA~(g/m^2))) + 
-  #xlab(bquote(Age~(yrs))) +
+  xlab(bquote(Height~(cm))) +
   scale_x_log10() +
   scale_y_log10() +
   geom_point(aes((height), (LMA), col = Species_name), alpha = 0.2) +
@@ -507,7 +507,7 @@ leaf_whole_height <- growth_data %>%
   ggplot(aes(height, mean_leaf_m_whole)) + 
   geom_smooth(method = 'lm', color = "black") + 
   ylab(bquote(LMF~(g/g))) + 
-  #xlab(bquote(Age~(yrs))) +
+  xlab(bquote(Height~(cm))) +
   scale_x_log10() +
   geom_point(aes((height), (mean_leaf_m_whole), col = Species_name),  alpha = 0.2) +
   geom_line(aes((height), (mean_leaf_m_whole), col = Species_name), alpha = 0.2, size = 0.8) +
@@ -523,7 +523,7 @@ P_height <- growth_data %>%
   ggplot(aes(height, mean_P_area)) + 
   #geom_smooth(method = 'lm', color = "black") + 
   ylab(bquote(P[area]~(g/m^2))) + 
-  #xlab(bquote(A~(yrs))) +
+  xlab(bquote(Height~(cm))) +
   scale_x_log10() +
   scale_y_log10() +
   geom_point(aes((height), (mean_P_area), col = species),  alpha = 0.2) +
@@ -541,7 +541,7 @@ N_height <- growth_data %>%
   ggplot(aes(height, mean_N_area)) +
   geom_smooth(method = 'lm', color = "black") + 
   ylab(bquote(N[area]~(g/m^2))) + 
-  #xlab(bquote(Age~(yrs))) +
+  xlab(bquote(Height~(cm))) +
   scale_x_log10() +
   scale_y_log10() +
   geom_point(aes((height), (mean_N_area), col = species),  alpha = 0.2) +
